@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3 uid="uid://dr3huvd0e8ucm"]
+
+[ext_resource type="Script" uid="uid://b6djib7lqppih" path="res://entities/camera/camera_controller.gd" id="1_lsbxg"]
+
+[node name="CameraController" type="Camera2D"]
+use_parent_material = true
+limit_left = 0
+limit_top = 2
+limit_right = 1280
+limit_bottom = 720
+script = ExtResource("1_lsbxg")
+enable_edge_pan = false
