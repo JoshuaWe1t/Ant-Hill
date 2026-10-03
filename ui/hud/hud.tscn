@@ -1,0 +1,128 @@
+[gd_scene load_steps=3 format=3 uid="uid://bvqqyi2svol2k"]
+
+[ext_resource type="Script" uid="uid://18v8l0tyo7mv" path="res://ui/hud/hud.gd" id="1_4d6w6"]
+[ext_resource type="Texture2D" uid="uid://dnhnf74yu2krq" path="res://icon.svg" id="1_xmswo"]
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_4d6w6")
+
+[node name="UIControl" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="MissionContainer" type="VBoxContainer" parent="UIControl"]
+layout_mode = 1
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TimerLabel" type="Label" parent="UIControl/MissionContainer"]
+layout_mode = 2
+text = "TimerLabel"
+
+[node name="QuestLabel" type="Label" parent="UIControl/MissionContainer"]
+layout_mode = 2
+text = "QuestLabel"
+
+[node name="ResourcesPanel" type="HBoxContainer" parent="UIControl"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -40.0
+offset_bottom = 40.0
+grow_horizontal = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="UIControl/ResourcesPanel"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UIControl/ResourcesPanel/MarginContainer"]
+layout_mode = 2
+
+[node name="WaterBox" type="HBoxContainer" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Icon" type="TextureRect" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/WaterBox"]
+layout_mode = 2
+texture = ExtResource("1_xmswo")
+expand_mode = 2
+
+[node name="Value" type="Label" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/WaterBox"]
+layout_mode = 2
+text = "1000"
+
+[node name="ProteinBox" type="HBoxContainer" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Icon" type="TextureRect" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/ProteinBox"]
+layout_mode = 2
+texture = ExtResource("1_xmswo")
+expand_mode = 2
+
+[node name="Value" type="Label" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/ProteinBox"]
+layout_mode = 2
+text = "1000"
+
+[node name="PhytomassBox" type="HBoxContainer" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Icon" type="TextureRect" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/PhytomassBox"]
+layout_mode = 2
+texture = ExtResource("1_xmswo")
+expand_mode = 2
+
+[node name="Value" type="Label" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/PhytomassBox"]
+layout_mode = 2
+text = "1000"
+
+[node name="WoodBox" type="HBoxContainer" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Icon" type="TextureRect" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/WoodBox"]
+layout_mode = 2
+texture = ExtResource("1_xmswo")
+expand_mode = 2
+
+[node name="Value" type="Label" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/WoodBox"]
+layout_mode = 2
+text = "1000"
+
+[node name="ClayBox" type="HBoxContainer" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Icon" type="TextureRect" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/ClayBox"]
+layout_mode = 2
+texture = ExtResource("1_xmswo")
+expand_mode = 2
+
+[node name="Value" type="Label" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/ClayBox"]
+layout_mode = 2
+text = "1000"
+
+[node name="ResinBox" type="HBoxContainer" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Icon" type="TextureRect" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/ResinBox"]
+layout_mode = 2
+texture = ExtResource("1_xmswo")
+expand_mode = 2
+
+[node name="Value" type="Label" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/ResinBox"]
+layout_mode = 2
+text = "1000"
+
+[node name="SilkBox" type="HBoxContainer" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Icon" type="TextureRect" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/SilkBox"]
+layout_mode = 2
+texture = ExtResource("1_xmswo")
+expand_mode = 2
+
+[node name="Value" type="Label" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/SilkBox"]
+layout_mode = 2
+text = "1000"
