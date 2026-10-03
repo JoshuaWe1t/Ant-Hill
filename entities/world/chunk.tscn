@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3 uid="uid://er348fhvplft"]
+
+[ext_resource type="Script" uid="uid://cbfeb3yfvgs62" path="res://entities/world/chunk.gd" id="1_4coln"]
+
+[node name="Chunk" type="Area2D"]
+script = ExtResource("1_4coln")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+
+[node name="ColorRect" type="ColorRect" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Label" type="Label" parent="."]
+offset_right = 40.0
+offset_bottom = 23.0
