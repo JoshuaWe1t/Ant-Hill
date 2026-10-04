@@ -1,0 +1,33 @@
+[gd_scene load_steps=4 format=3 uid="uid://d20t83o8o7rhn"]
+
+[ext_resource type="Texture2D" uid="uid://dnhnf74yu2krq" path="res://icon.svg" id="1_34iq6"]
+[ext_resource type="Script" uid="uid://c71ov57vbj6wk" path="res://entities/ants/ant_base.gd" id="1_f4j16"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_f4j16"]
+radius = 18.0
+height = 54.0
+
+[node name="AntBase" type="CharacterBody2D"]
+collision_layer = 2
+script = ExtResource("1_f4j16")
+worker_texture = ExtResource("1_34iq6")
+soldier_texture = ExtResource("1_34iq6")
+babysitter_texture = ExtResource("1_34iq6")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.45, 0.45)
+texture = ExtResource("1_34iq6")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CapsuleShape2D_f4j16")
+
+[node name="HungerTimer" type="Timer" parent="."]
+wait_time = 10.0
+autostart = true
+
+[node name="AgingTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="StateLabel" type="Label" parent="."]
+offset_right = 40.0
+offset_bottom = 23.0
