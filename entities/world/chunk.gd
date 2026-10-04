@@ -96,9 +96,30 @@ func complete_scouting() -> void:
 
 
 ## Клик по чанку для выбора цели разведки / постройки
+#func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
+	#if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed():
+		## Оповещаем шину событий о клике по конкретному чанку
+		#if has_node("/root/EventBus"):
+			#get_node("/root/EventBus").emit_signal("chunk_clicked", self)
+		#print("Клик по чанку: ", name, " | Статус: ", status, " | Разведка возможна: ", can_be_scouted())
+
+## Клик по чанку для выбора цели разведки / постройки
 func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed():
-		# Оповещаем шину событий о клике по конкретному чанку
+		# Если под курсором в этот момент есть объект из слоя Entities (Королева/муравей),
+		# чанк не должен перехватывать клик на себя
+		var space_state := get_world_2d().direct_space_state
+		var point_params := PhysicsPointQueryParameters2D.new()
+		point_params.position = get_global_mouse_position()
+		point_params.collision_mask = 2 # Слой 2: Entities
+		point_params.collide_with_areas = true
+		point_params.collide_with_bodies = true
+		
+		var hits := space_state.intersect_point(point_params)
+		if hits.size() > 0:
+			# Клик пришелся на юнита, чанк игнорирует событие
+			return
+
 		if has_node("/root/EventBus"):
 			get_node("/root/EventBus").emit_signal("chunk_clicked", self)
 		print("Клик по чанку: ", name, " | Статус: ", status, " | Разведка возможна: ", can_be_scouted())

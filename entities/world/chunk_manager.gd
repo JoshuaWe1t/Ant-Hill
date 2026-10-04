@@ -105,3 +105,12 @@ func is_position_buildable(world_pos: Vector2) -> bool:
 		if rect.has_point(world_pos):
 			return chunk.status == Chunk.Status.UNLOCKED
 	return false
+
+
+## Находит чанк, в котором находится заданная точка
+func get_chunk_at_position(world_pos: Vector2) -> Chunk:
+	for chunk in all_chunks:
+		var rect := Rect2(chunk.global_position, chunk.chunk_size)
+		if rect.has_point(world_pos):
+			return chunk
+	return null
