@@ -1,0 +1,30 @@
+[gd_scene load_steps=8 format=3 uid="uid://bsk1xkrns6upr"]
+
+[ext_resource type="Script" uid="uid://q0s66hxbnols" path="res://scenes/levels/test_level.gd" id="1_6xh4u"]
+[ext_resource type="Script" uid="uid://busce5ef8ra8q" path="res://entities/world/chunk_manager.gd" id="1_48ne7"]
+[ext_resource type="PackedScene" uid="uid://er348fhvplft" path="res://entities/world/chunk.tscn" id="2_6xh4u"]
+[ext_resource type="PackedScene" uid="uid://deidj76shhc2m" path="res://entities/queen/queen.tscn" id="3_cyt5c"]
+[ext_resource type="PackedScene" uid="uid://dr3huvd0e8ucm" path="res://entities/camera/camera_controller.tscn" id="4_7x1jh"]
+[ext_resource type="PackedScene" uid="uid://crs1po5ovofv0" path="res://entities/cocoon/cocoon.tscn" id="5_cyt5c"]
+[ext_resource type="PackedScene" uid="uid://bvqqyi2svol2k" path="res://ui/hud/hud.tscn" id="5_hfwtw"]
+
+[node name="TestLevel" type="Node2D"]
+script = ExtResource("1_6xh4u")
+
+[node name="GroundLevelLine" type="Line2D" parent="."]
+points = PackedVector2Array(-2000, 0, 2000, 0)
+width = 2.0
+default_color = Color(1, 1, 0, 1)
+
+[node name="ChunkManager" type="Node2D" parent="."]
+script = ExtResource("1_48ne7")
+chunk_scene = ExtResource("2_6xh4u")
+starter_chunk_size = Vector2(250, 500)
+
+[node name="Queen" parent="." instance=ExtResource("3_cyt5c")]
+position = Vector2(0, 150)
+cocoon_scene = ExtResource("5_cyt5c")
+
+[node name="CameraController" parent="." instance=ExtResource("4_7x1jh")]
+
+[node name="HUD" parent="." instance=ExtResource("5_hfwtw")]
