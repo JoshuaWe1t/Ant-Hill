@@ -17,11 +17,18 @@ config/icon="res://icon.svg"
 [autoload]
 
 ResourceManager="*res://core/autoload/ResourceManager.gd"
+EventBus="*res://core/autoload/EventBus.gd"
+AddResources="*res://debug/cheats/add_resources.gd"
 
 [display]
 
 window/size/viewport_width=1280
 window/size/viewport_height=720
+
+[layer_names]
+
+2d_physics/layer_1="World_Chunks"
+2d_physics/layer_2="Entities"
 
 [rendering]
 
