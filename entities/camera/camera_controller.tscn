@@ -4,9 +4,9 @@
 
 [node name="CameraController" type="Camera2D"]
 use_parent_material = true
-limit_left = 0
-limit_top = 2
-limit_right = 1280
-limit_bottom = 720
+limit_left = -4000
+limit_top = -350
+limit_right = 4000
+limit_bottom = 4000
 script = ExtResource("1_lsbxg")
 enable_edge_pan = false
