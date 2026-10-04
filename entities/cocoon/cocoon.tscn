@@ -1,0 +1,27 @@
+[gd_scene load_steps=4 format=3 uid="uid://crs1po5ovofv0"]
+
+[ext_resource type="Script" uid="uid://chnh3dr5u04lg" path="res://entities/cocoon/cocoon.gd" id="1_8hnb1"]
+[ext_resource type="Texture2D" uid="uid://dnhnf74yu2krq" path="res://icon.svg" id="1_qdnsp"]
+[ext_resource type="PackedScene" uid="uid://d20t83o8o7rhn" path="res://entities/ants/ant_base.tscn" id="2_j7vfo"]
+
+[node name="Cocoon" type="Area2D"]
+z_index = 20
+script = ExtResource("1_8hnb1")
+ant_scene = ExtResource("2_j7vfo")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("1_qdnsp")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+
+[node name="IncubationTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="ProgressBar" type="ProgressBar" parent="."]
+offset_left = -19.0
+offset_top = -26.0
+offset_right = 18.0
+offset_bottom = -20.0
+mouse_filter = 2
+show_percentage = false
