@@ -8,16 +8,28 @@ extends CanvasLayer
 @onready var clay_label: Label = $UIControl/ResourcesPanel/MarginContainer/HBoxContainer/ClayBox/Value
 @onready var resin_label: Label = $UIControl/ResourcesPanel/MarginContainer/HBoxContainer/ResinBox/Value
 @onready var silk_label: Label = $UIControl/ResourcesPanel/MarginContainer/HBoxContainer/SilkBox/Value
+@onready var starvation_banner: PanelContainer = $StarvationBanner
+@onready var banner_label: Label = $StarvationBanner/BannerLabel
 
 # Блок миссии и таймера (Левый верхний угол по GDD)
 @onready var timer_label: Label = $UIControl/MissionContainer/TimerLabel
 @onready var quest_label: Label = $UIControl/MissionContainer/QuestLabel
+
+var starvation_tween: Tween = null
 
 # Словарь для быстрого доступа по типу из Enum
 var _resource_labels: Dictionary = {}
 
 
 func _ready() -> void:
+	if starvation_banner:
+		starvation_banner.modulate.a = 0.0
+
+	# Подключаем сигналы шины событий
+	if is_instance_valid(EventBus):
+		EventBus.queen_starving.connect(_on_queen_starving)
+		EventBus.queen_fed.connect(_on_queen_fed)
+		
 	# Формируем соответствие enum -> label
 	_resource_labels = {
 		ResourceManager.ResourceType.WATER: water_label,
@@ -62,10 +74,38 @@ func set_quest_text(description: String) -> void:
 	quest_label.text = description
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	# Нажмите T для симуляции сбора 10 воды и 5 дерева
-	if event is InputEventKey and event.pressed and event.keycode == KEY_T:
-		ResourceManager.add_resources({
-			ResourceManager.ResourceType.WATER: 10,
-			ResourceManager.ResourceType.WOOD: 5
-		})
+## Срабатывает, когда Королеве не хватило ресурсов
+func _on_queen_starving(missing_amount: int) -> void:
+	if not starvation_banner:
+		return
+
+	if banner_label:
+		banner_label.text = "КОРОЛЕВА ГОЛОДАЕТ! ДЕФИЦИТ РЕСУРСОВ: %d" % missing_amount
+
+	# Прерываем предыдущую анимацию, если она шла
+	if starvation_tween and starvation_tween.is_valid():
+		starvation_tween.kill()
+
+	starvation_tween = create_tween().set_loops(4) # Мигаем 4 раза
+	# Пульсирующий красный цвет
+	starvation_tween.tween_property(starvation_banner, "modulate", Color(0.974, 0.822, 0.154, 1.0), 0.4)
+	starvation_tween.tween_property(starvation_banner, "modulate", Color(1.0, 0.2, 0.2, 0.2), 0.4)
+	
+	# После завершения пульсации плавно скрываем баннер
+	starvation_tween.finished.connect(func():
+		var fade_out := create_tween()
+		fade_out.tween_property(starvation_banner, "modulate:a", 0.0, 0.5)
+	)
+
+
+## Срабатывает, когда Королева успешно поела
+func _on_queen_fed() -> void:
+	if not starvation_banner:
+		return
+
+	if starvation_tween and starvation_tween.is_valid():
+		starvation_tween.kill()
+
+	# Плавно убираем предупреждение, если запасы восполнены
+	var fade_out := create_tween()
+	fade_out.tween_property(starvation_banner, "modulate:a", 0.0, 0.3)
