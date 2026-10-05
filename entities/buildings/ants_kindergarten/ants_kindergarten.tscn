@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://m5hacmgc0hq6"]
+
+[ext_resource type="PackedScene" uid="uid://cdoeypllfriql" path="res://entities/buildings/building_base/building_base.tscn" id="1_pxyya"]
+[ext_resource type="Script" uid="uid://2k4eus0m62cq" path="res://entities/buildings/ants_kindergarten/ants_kindergarten.gd" id="2_5ph8c"]
+
+[node name="AntsKindergarten" instance=ExtResource("1_pxyya")]
+script = ExtResource("2_5ph8c")
+max_cocoon_capacity = 2
+incubation_speed_bonus = 0.25
