@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 ResourceManager="*res://core/autoload/ResourceManager.gd"
 EventBus="*res://core/autoload/EventBus.gd"
 AddResources="*res://debug/cheats/add_resources.gd"
+ColonyManager="*res://core/autoload/ColonyManager.gd"
 
 [display]
 
