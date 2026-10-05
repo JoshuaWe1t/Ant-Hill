@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://deidj76shhc2m"]
+[gd_scene load_steps=5 format=3 uid="uid://deidj76shhc2m"]
 
 [ext_resource type="Texture2D" uid="uid://dnhnf74yu2krq" path="res://icon.svg" id="1_7lr04"]
 [ext_resource type="Script" uid="uid://bt7a8qtvsrgwk" path="res://entities/queen/queen.gd" id="1_mjrnf"]
+[ext_resource type="PackedScene" uid="uid://crs1po5ovofv0" path="res://entities/cocoon/cocoon.tscn" id="2_h1hci"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mjrnf"]
 size = Vector2(116, 115)
@@ -11,6 +12,7 @@ z_index = 10
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("1_mjrnf")
+cocoon_scene = ExtResource("2_h1hci")
 
 [node name="SelectionIndicator" type="ColorRect" parent="."]
 visible = false
