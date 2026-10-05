@@ -157,27 +157,71 @@ func _on_timer_timeout() -> void:
 	#queue_free()
 
 
+#func _hatch() -> void:
+	#if ant_scene:
+		#var ant: AntBase = ant_scene.instantiate()
+		#ant.ant_type = ant_type
+		#ant.global_position = global_position
+		#ant.enable_aging = false
+		#
+		## Находим здание Гнезда и регистрируем юнита
+		#var nest: Nest = get_tree().root.find_child("Nest", true, false)
+		#if nest:
+			#nest.register_unit(ant)
+			## Назначаем муравью текущий чанк
+			#var chunk_manager: ChunkManager = get_tree().root.find_child("ChunkManager", true, false)
+			#if chunk_manager:
+				#var home_chunk: Chunk = chunk_manager.get_chunk_at_position(global_position)
+				#if home_chunk:
+					#ant.assign_chunk(home_chunk)
+		#
+		#get_parent().add_child(ant)
+	#
+	#hatched.emit(ant_type, global_position)
+	#queue_free()
+
+
 func _hatch() -> void:
+	print("Куколка созрела! Вылупляется муравей типа: ", ant_type)
+
 	if ant_scene:
+		# 1. Проверяем глобальный лимит колонии
+		if is_instance_valid(ColonyManager) and not ColonyManager.can_spawn_ant():
+			print("Вылупление отменено: нет свободных мест в колонии!")
+			# Можно уничтожить куколку или отложить вылупление
+			queue_free()
+			return
+
+		# 2. Создаем инстанс муравья
 		var ant: AntBase = ant_scene.instantiate()
 		ant.ant_type = ant_type
 		ant.global_position = global_position
 		ant.enable_aging = false
-		
-		# Находим здание Гнезда и регистрируем юнита
+
+		# 3. Назначаем домашний открытый чанк
+		var chunk_manager: ChunkManager = get_tree().root.find_child("ChunkManager", true, false)
+		if chunk_manager:
+			var home_chunk: Chunk = chunk_manager.get_chunk_at_position(global_position)
+			if home_chunk and home_chunk.status == Chunk.Status.UNLOCKED:
+				ant.assign_chunk(home_chunk)
+
+		# 4. Добавляем муравья в мир
+		get_parent().add_child(ant)
+
+		# 5. СВЯЗКА С COLONY MANAGER: регистрируем живого юнита в колонии
+		if is_instance_valid(ColonyManager):
+			ColonyManager.register_ant(ant)
+
+		# 6. Также регистрируем в Nest (если используется локальный учет в гнезде)
 		var nest: Nest = get_tree().root.find_child("Nest", true, false)
 		if nest:
 			nest.register_unit(ant)
-			# Назначаем муравью текущий чанк
-			var chunk_manager: ChunkManager = get_tree().root.find_child("ChunkManager", true, false)
-			if chunk_manager:
-				var home_chunk: Chunk = chunk_manager.get_chunk_at_position(global_position)
-				if home_chunk:
-					ant.assign_chunk(home_chunk)
-		
-		get_parent().add_child(ant)
-	
+
+	# Оповещаем системы через сигналы
 	hatched.emit(ant_type, global_position)
+	if is_instance_valid(EventBus):
+		EventBus.ant_spawned.emit(ant_type)
+
 	queue_free()
 
 

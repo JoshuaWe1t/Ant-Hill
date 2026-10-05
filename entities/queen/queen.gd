@@ -243,19 +243,19 @@ func produce_cocoon(type: Cocoon.AntType) -> bool:
 		push_error("В инспекторе Королевы не назначена cocoon_scene!")
 		return false
 
-	# 1. Проверяем лимит населения гнезда (не более 30)
-	if home_nest and not home_nest.can_accept_unit():
-		print("Невозможно создать куколку: достигнут лимит населения Гнезда (30 юнитов)!")
+	# 1. Проверяем глобальный лимит населения колонии через ColonyManager
+	if is_instance_valid(ColonyManager) and not ColonyManager.can_spawn_ant():
+		print("Невозможно создать куколку: достигнут общий лимит населения колонии (%d)!" % ColonyManager.get_max_population())
 		return false
 
 	var cost: Dictionary = SPAWN_COSTS.get(type, {})
 	
-	# 2. Проверяем и списываем ресурсы
+	# 2. Проверяем и списываем ресурсы (GDD Раздел 4.2)[cite: 7]
 	if not ResourceManager.spend_resources(cost):
 		print("Недостаточно ресурсов для создания муравья!")
 		return false
 
-	# 3. Спавним куколку внутри здания гнезда (в радиусе 65-85 px от Королевы)
+	# 3. Спавним куколку в радиусе 65-85 px от Королевы
 	var cocoon: Cocoon = cocoon_scene.instantiate()
 	var random_angle: float = randf_range(0.0, TAU)
 	var spawn_distance: float = randf_range(65.0, 85.0)
@@ -264,6 +264,7 @@ func produce_cocoon(type: Cocoon.AntType) -> bool:
 	cocoon.global_position = global_position + spawn_offset
 	get_parent().add_child(cocoon)
 	cocoon.setup(type)
+	print("Куколка отложена: ", Cocoon.AntType.keys()[type])
 	return true
 
 
