@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3 uid="uid://cwtl2tc8taycv"]
+
+[ext_resource type="Script" uid="uid://bqurt5dwrd51w" path="res://entities/buildings/building_preview/building_preview.gd" id="1_0xv33"]
+
+[node name="BuildingPreview" type="Area2D"]
+z_index = 30
+collision_layer = 0
+script = ExtResource("1_0xv33")
+valid_color = null
+invalid_color = null
+
+[node name="ColorRect" type="ColorRect" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
