@@ -4,7 +4,7 @@ extends Node2D
 @export var chunk_scene: PackedScene
 @export var ground_y_level: float = 0.0 ## Линия поверхности (земли)
 
-# Стартовый квадратный чанк
+# Стартовый чанк
 @export var starter_chunk_size: Vector2 = Vector2(300, 300)
 
 # Варианты форм для процедурной генерации комнат муравейника
@@ -17,6 +17,7 @@ var chunk_shapes: Array[Vector2] = [
 ]
 
 var all_chunks: Array[Chunk] = []
+var starter_chunk: Chunk = null ## Ссылка на стартовую комнату муравейника
 
 
 func _ready() -> void:
@@ -27,16 +28,16 @@ func _ready() -> void:
 func generate_underground() -> void:
 	# 1. Стартовый чанк (всегда UNLOCKED и строго под поверхностью земли)
 	var start_pos := Vector2(-starter_chunk_size.x / 2.0, ground_y_level)
-	var starter := _spawn_chunk(start_pos, starter_chunk_size, Chunk.Status.UNLOCKED)
-	starter.name = "StarterChunk"
+	starter_chunk = _spawn_chunk(start_pos, starter_chunk_size, Chunk.Status.UNLOCKED)
+	starter_chunk.name = "StarterChunk"
 
 	# 2. Создаем ветви/соседей от стартового чанка
 	# Слева
-	_attach_chunk_to(starter, Vector2.LEFT, chunk_shapes.pick_random())
+	_attach_chunk_to(starter_chunk, Vector2.LEFT, chunk_shapes.pick_random())
 	# Справа
-	_attach_chunk_to(starter, Vector2.RIGHT, chunk_shapes.pick_random())
+	_attach_chunk_to(starter_chunk, Vector2.RIGHT, chunk_shapes.pick_random())
 	# Вглубь (вниз)
-	var bottom_chunk := _attach_chunk_to(starter, Vector2.DOWN, chunk_shapes.pick_random())
+	var bottom_chunk := _attach_chunk_to(starter_chunk, Vector2.DOWN, chunk_shapes.pick_random())
 
 	# 3. Делаем второй ярус вглубь от нижнего чанка
 	if bottom_chunk:
@@ -114,3 +115,10 @@ func get_chunk_at_position(world_pos: Vector2) -> Chunk:
 		if rect.has_point(world_pos):
 			return chunk
 	return null
+
+
+## Возвращает мировую позицию центра стартовой комнаты
+func get_starter_spawn_point() -> Vector2:
+	if starter_chunk:
+		return starter_chunk.global_position + (starter_chunk.chunk_size / 2.0)
+	return Vector2(0.0, 150.0)
