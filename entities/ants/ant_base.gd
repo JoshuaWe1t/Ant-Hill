@@ -4,10 +4,12 @@ extends CharacterBody2D
 signal died(ant_instance: AntBase)
 
 enum State {
-	IDLE,       # Ожидание / легкое блуждание
-	MOVE_TO,    # Перемещение к цели (здание, чанк, склад)
-	WORK,       # Выполнение работы (строительство, уход за куколками)
-	DEAD        # Состояние смерти
+	IDLE,           # Ожидание / легкое блуждание
+	WANDER,
+	MOVE_TO,        # Перемещение к цели (здание, чанк, склад)
+	MOVE_TO_BUILD,  # Движение к стройплощадке
+	WORK,           # Выполнение работы (строительство, уход за куколками)
+	DEAD            # Состояние смерти
 }
 
 # --- Параметры по GDD (Раздел 4.2) ---
@@ -42,6 +44,10 @@ var target_position: Vector2 = Vector2.ZERO
 var arrive_distance: float = 8.0
 var wander_timer: float = 0.0
 
+# Строительство
+var current_workplace: BuildingBase = null
+var build_interaction_distance: float = 40.0 ## Дистанция касания стройплощадки
+
 @onready var sprite_2d: Sprite2D = $Sprite2D
 @onready var hunger_timer: Timer = $HungerTimer
 @onready var aging_timer: Timer = $AgingTimer
@@ -51,10 +57,11 @@ var wander_timer: float = 0.0
 # Ссылка на чанк, в котором сейчас обитает муравей
 var current_chunk: Chunk = null
 
+
 func _ready() -> void:
 	z_index = 5
 	_apply_stats_from_gdd()
-	_apply_visuals() # Накладываем нужный спрайт
+	_apply_visuals()
 	current_health = max_health
 	
 	# Настройка таймера голода / содержания
@@ -106,40 +113,23 @@ func _physics_process(delta: float) -> void:
 			_process_idle(delta)
 		State.MOVE_TO:
 			_process_move_to(delta)
+		State.MOVE_TO_BUILD:
+			_process_move_to_build(delta)
 		State.WORK:
-			velocity = Vector2.ZERO
+			_process_work(delta)
 		State.DEAD:
 			velocity = Vector2.ZERO
 
 	move_and_slide()
 
 
-### 1. Поведение IDLE: небольшое случайное блуждание по чанку
-#func _process_idle(delta: float) -> void:
-	#wander_timer -= delta
-	#if wander_timer <= 0.0:
-		## Выбираем случайную точку неподалеку (в пределах 60 пикселей)
-		#var random_dir := Vector2.from_angle(randf_range(0.0, TAU))
-		#target_position = global_position + (random_dir * randf_range(60.0, 200.0))
-		#wander_timer = randf_range(3.0, 6.0)
-#
-	## Двигаемся к точке блуждания
-	#if global_position.distance_to(target_position) > arrive_distance:
-		#var dir := (target_position - global_position).normalized()
-		#velocity = dir * (move_speed * 0.4) # Медленно бродит
-		#_flip_sprite(dir.x)
-	#else:
-		#velocity = Vector2.ZERO
-
-
-## Обновленная логика IDLE: блуждание строго внутри открытого чанка
+## 1. Поведение IDLE: блуждание строго внутри открытого чанка
 func _process_idle(delta: float) -> void:
 	wander_timer -= delta
 	if wander_timer <= 0.0:
 		target_position = _get_random_point_in_chunk()
 		wander_timer = randf_range(3.0, 6.0)
 
-	# Движение к выбранной точке внутри чанка
 	if global_position.distance_to(target_position) > arrive_distance:
 		var dir := (target_position - global_position).normalized()
 		velocity = dir * (move_speed * 0.4)
@@ -148,7 +138,7 @@ func _process_idle(delta: float) -> void:
 		velocity = Vector2.ZERO
 
 
-## 2. Поведение MOVE_TO: направленное движение к рабочей задаче
+## 2. Поведение MOVE_TO: направленное движение к произвольной точке
 func _process_move_to(_delta: float) -> void:
 	var dist: float = global_position.distance_to(target_position)
 	if dist <= arrive_distance:
@@ -158,6 +148,50 @@ func _process_move_to(_delta: float) -> void:
 		var dir := (target_position - global_position).normalized()
 		velocity = dir * move_speed
 		_flip_sprite(dir.x)
+
+
+## 3. Поведение MOVE_TO_BUILD: бег к стройплощадке
+func _process_move_to_build(_delta: float) -> void:
+	if not is_instance_valid(current_workplace):
+		finish_work()
+		return
+
+	var dist: float = global_position.distance_to(current_workplace.global_position)
+	if dist <= build_interaction_distance:
+		velocity = Vector2.ZERO
+		# Подошли к стройке — пробуем зарегистрироваться в качестве строителя
+		if current_workplace.assign_worker(self):
+			_set_state(State.WORK)
+		else:
+			# Если на стройке уже заняты все 2 места
+			finish_work()
+	else:
+		var dir := (current_workplace.global_position - global_position).normalized()
+		velocity = dir * move_speed
+		_flip_sprite(dir.x)
+
+
+## 4. Поведение WORK: непосредственная работа на стройке
+func _process_work(_delta: float) -> void:
+	velocity = Vector2.ZERO
+	# Если стройка завершена, удалена или отменена — освобождаемся
+	if not is_instance_valid(current_workplace) or current_workplace.current_state == BuildingBase.BuildState.OPERATIONAL:
+		finish_work()
+
+
+## Приказ от ColonyManager отправиться строить объект
+func assign_to_construction(building: BuildingBase) -> void:
+	current_workplace = building
+	target_position = building.global_position
+	_set_state(State.MOVE_TO_BUILD)
+
+
+## Завершение работы на объекте
+func finish_work() -> void:
+	if is_instance_valid(current_workplace):
+		current_workplace.unassign_worker(self)
+	current_workplace = null
+	_set_state(State.IDLE)
 
 
 ## Приказ на перемещение в конкретную точку
@@ -170,7 +204,7 @@ func _on_target_reached() -> void:
 	_set_state(State.IDLE)
 
 
-## 3. Периодическое потребление ресурсов колонии
+## Периодическое потребление ресурсов колонии
 func _on_hunger_tick() -> void:
 	var upkeep_cost: Dictionary = {
 		ResourceManager.ResourceType.WATER: water_upkeep,
@@ -178,23 +212,19 @@ func _on_hunger_tick() -> void:
 		ResourceManager.ResourceType.PHYTOMASS: phytomass_upkeep
 	}
 
-	# Если колония может прокормить муравья — списываем ресурсы
 	if ResourceManager.spend_resources(upkeep_cost):
 		pass
 	else:
-		# Ресурсов нет — муравей получает урон от истощения
 		print("Колония голодает! Муравей %s теряет здоровье." % name)
 		take_damage(2.0)
 
 
-## 4. Заготовка таймера старения (Пока без реальной смерти)
+## Таймер старения
 func _on_aging_timeout() -> void:
 	if not enable_aging:
 		return
 
 	print("Муравей %s достиг предельного возраста (%s сек)." % [name, lifespan])
-	# Заготовка под будущие штрафы к скорости / смерть:
-	# _die("starost")
 
 
 ## Переключение FSM состояний
@@ -204,7 +234,8 @@ func _set_state(new_state: State) -> void:
 		match current_state:
 			State.IDLE: state_label.text = "Idle"
 			State.MOVE_TO: state_label.text = "Move"
-			State.WORK: state_label.text = "Work"
+			State.MOVE_TO_BUILD: state_label.text = "To Build"
+			State.WORK: state_label.text = "Build"
 			State.DEAD: state_label.text = "Dead"
 
 
@@ -218,6 +249,8 @@ func take_damage(amount: float) -> void:
 
 func _die(_reason: String) -> void:
 	_set_state(State.DEAD)
+	if is_instance_valid(current_workplace):
+		current_workplace.unassign_worker(self)
 	died.emit(self)
 	print("Муравей погиб. Причина: ", _reason)
 	queue_free()
@@ -227,7 +260,7 @@ func _flip_sprite(dir_x: float) -> void:
 	if sprite and abs(dir_x) > 0.1:
 		sprite.scale.x = abs(sprite.scale.x) if dir_x > 0 else -abs(sprite.scale.x)
 
-### Подстановка текстуры в зависимости от ant_type
+
 #func _apply_visuals() -> void:
 	#if not sprite_2d:
 		#return
@@ -243,38 +276,36 @@ func _flip_sprite(dir_x: float) -> void:
 			#if babysitter_texture:
 				#sprite_2d.texture = babysitter_texture
 
+
 func _apply_visuals() -> void:
 	if not sprite_2d:
 		return
 
 	match ant_type:
 		Cocoon.AntType.WORKER:
-			sprite_2d.modulate = Color(0.149, 0.569, 0.059, 1.0) # Коричневый
+			sprite_2d.modulate = Color(0.149, 0.569, 0.059, 1.0)
 		Cocoon.AntType.SOLDIER:
-			sprite_2d.modulate = Color(0.9, 0.2, 0.2) # Красный
+			sprite_2d.modulate = Color(0.9, 0.2, 0.2)
 		Cocoon.AntType.BABYSITTER:
-			sprite_2d.modulate = Color(0.2, 0.7, 0.9) # Голубой
+			sprite_2d.modulate = Color(0.2, 0.7, 0.9)
 
 
-## Назначение домашнего чанка (вызывается при спавне или переходе)
+## Назначение домашнего чанка
 func assign_chunk(chunk: Chunk) -> void:
 	current_chunk = chunk
 
 
 ## Генерация случайной точки внутри границ чанка
 func _get_random_point_in_chunk() -> Vector2:
-	# Если чанк назначен — выбираем точку внутри его прямоугольника с небольшим отступом от стен
 	if is_instance_valid(current_chunk):
-		var margin: float = 16.0 # Отступ от границ, чтобы муравей не застревал в стенах
+		var margin: float = 16.0
 		var min_x: float = current_chunk.global_position.x + margin
 		var max_x: float = current_chunk.global_position.x + current_chunk.chunk_size.x - margin
 		var min_y: float = current_chunk.global_position.y + margin
 		var max_y: float = current_chunk.global_position.y + current_chunk.chunk_size.y - margin
 
-		# На случай, если чанк слишком маленький для отступов
 		if min_x < max_x and min_y < max_y:
 			return Vector2(randf_range(min_x, max_x), randf_range(min_y, max_y))
 
-	# Запасной вариант: если чанк не найден, блуждаем вокруг текущей точки
 	var random_dir := Vector2.from_angle(randf_range(0.0, TAU))
 	return global_position + (random_dir * randf_range(15.0, 45.0))
