@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://5hyasanrtlyp"]
+
+[ext_resource type="PackedScene" uid="uid://cdoeypllfriql" path="res://entities/buildings/building_base/building_base.tscn" id="1_tx7pc"]
+[ext_resource type="Script" uid="uid://bw3tcs1crpiu7" path="res://entities/buildings/stockpile/stockpile.gd" id="2_n26h2"]
+
+[node name="Stockpile" instance=ExtResource("1_tx7pc")]
+script = ExtResource("2_n26h2")
+storage_capacity_bonus = 500
