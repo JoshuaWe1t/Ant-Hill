@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://pdwm03ni713q"]
+
+[ext_resource type="PackedScene" uid="uid://cdoeypllfriql" path="res://entities/buildings/building_base/building_base.tscn" id="1_0gl3p"]
+[ext_resource type="Script" uid="uid://ca6abk77panq2" path="res://entities/buildings/aphid_farm/aphid_farm.gd" id="2_8nkce"]
+
+[node name="AphidFarm" instance=ExtResource("1_0gl3p")]
+script = ExtResource("2_8nkce")
+production_interval = 15.0
+max_worker_capacity = 5
+production_yield = {
+0: 2,
+1: 2,
+2: 5,
+6: 3
+}
