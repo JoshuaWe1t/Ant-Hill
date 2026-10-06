@@ -4,7 +4,7 @@ extends Area2D
 signal status_changed(new_status: Status)
 
 enum Status {
-	LOCKED,      # Недоступен для стройки, но можно исследовать (туман / земля)
+	LOCKED,      # Недоступен для стройки, но можно исследовать
 	SCOUTING,    # В процессе исследования муравьями
 	UNLOCKED     # Исследован, доступен для строительства
 }
@@ -12,18 +12,31 @@ enum Status {
 @export var chunk_size: Vector2 = Vector2(256, 256)
 var status: Status = Status.LOCKED : set = _set_status
 
+# Переменные для отслеживания прогресса разведки (45 секунд)
+var scout_duration: float = 45.0
+var current_scout_time: float = 0.0
+
 # Соседи чанка для проверки доступности разведки
 var neighbors: Array[Chunk] = []
 
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var debug_rect: ColorRect = $ColorRect
 @onready var debug_label: Label = $Label
+@onready var progress_bar: ProgressBar = get_node_or_null("ProgressBar")
 
 
 func _ready() -> void:
 	_update_shape()
 	_update_visuals()
 	input_event.connect(_on_input_event)
+
+
+func _process(delta: float) -> void:
+	# Если чанк исследуется, плавно заполняем прогресс-бар
+	if status == Status.SCOUTING:
+		current_scout_time += delta
+		if progress_bar:
+			progress_bar.value = current_scout_time
 
 
 func setup(size: Vector2, initial_status: Status = Status.LOCKED) -> void:
@@ -40,7 +53,6 @@ func _update_shape() -> void:
 	var rect_shape := RectangleShape2D.new()
 	rect_shape.size = chunk_size
 	collision_shape.shape = rect_shape
-	# Центрируем коллизию относительно позиции узла
 	collision_shape.position = chunk_size / 2.0
 
 
@@ -57,24 +69,31 @@ func _update_visuals() -> void:
 
 	match status:
 		Status.LOCKED:
-			# Темно-коричневый / закрытая земля
 			debug_rect.color = Color(0.18, 0.12, 0.08, 0.95)
 			if debug_label:
 				debug_label.text = "Locked"
+			if progress_bar:
+				progress_bar.visible = false
 		Status.SCOUTING:
-			# Желтовато-оранжевый / идет разведка
 			debug_rect.color = Color(0.6, 0.45, 0.1, 0.8)
 			if debug_label:
 				debug_label.text = "Scouting..."
+			# Настраиваем и показываем прогресс-бар по центру чанка
+			if progress_bar:
+				progress_bar.max_value = scout_duration
+				progress_bar.value = current_scout_time
+				progress_bar.size = Vector2(chunk_size.x * 0.6, 16.0) # Ширина 60% от размера чанка
+				progress_bar.position = (chunk_size / 2.0) - (progress_bar.size / 2.0)
+				progress_bar.visible = true
 		Status.UNLOCKED:
-			# Светлая вырытая полость / открыто для застройки
 			debug_rect.color = Color(0.35, 0.25, 0.18, 0.4)
 			if debug_label:
 				debug_label.text = "Available"
+			if progress_bar:
+				progress_bar.visible = false
 
 
 ## Можно ли начать разведку этого чанка?
-## Чанк должен быть LOCKED и хотя бы один его сосед должен быть уже UNLOCKED
 func can_be_scouted() -> bool:
 	if status != Status.LOCKED:
 		return false
@@ -87,27 +106,18 @@ func can_be_scouted() -> bool:
 ## Старт процесса разведки
 func start_scouting() -> void:
 	if can_be_scouted():
+		current_scout_time = 0.0
 		status = Status.SCOUTING
 
 
-## Завершение разведки (вызывается по завершении таймера или возвращении муравьев)
+## Завершение разведки
 func complete_scouting() -> void:
 	status = Status.UNLOCKED
 
 
 ## Клик по чанку для выбора цели разведки / постройки
-#func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
-	#if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed():
-		## Оповещаем шину событий о клике по конкретному чанку
-		#if has_node("/root/EventBus"):
-			#get_node("/root/EventBus").emit_signal("chunk_clicked", self)
-		#print("Клик по чанку: ", name, " | Статус: ", status, " | Разведка возможна: ", can_be_scouted())
-
-## Клик по чанку для выбора цели разведки / постройки
 func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed():
-		# Если под курсором в этот момент есть объект из слоя Entities (Королева/муравей),
-		# чанк не должен перехватывать клик на себя
 		var space_state := get_world_2d().direct_space_state
 		var point_params := PhysicsPointQueryParameters2D.new()
 		point_params.position = get_global_mouse_position()
@@ -117,9 +127,8 @@ func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> voi
 		
 		var hits := space_state.intersect_point(point_params)
 		if hits.size() > 0:
-			# Клик пришелся на юнита, чанк игнорирует событие
 			return
 
 		if has_node("/root/EventBus"):
-			get_node("/root/EventBus").emit_signal("chunk_clicked", self)
+			EventBus.chunk_clicked.emit(self)
 		print("Клик по чанку: ", name, " | Статус: ", status, " | Разведка возможна: ", can_be_scouted())
