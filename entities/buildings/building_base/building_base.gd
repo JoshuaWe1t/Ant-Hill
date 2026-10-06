@@ -14,7 +14,7 @@ enum BuildState {
 @export var building_id: String = "building_base"
 @export var building_name: String = "Постройка"
 @export var build_duration: float = 30.0     ## Базовое время строительства (в секундах)
-@export var required_workers: int = 2       ## Ровно 2 юнита по GDD (Раздел 4.2)
+@export var required_workers: int = 2       ## Ровно 2 юнита по GDD
 @export var building_size: Vector2 = Vector2(100, 100)
 
 var current_state: BuildState = BuildState.BLUEPRINT
@@ -32,10 +32,14 @@ func _ready() -> void:
 	collision_layer = 1
 	collision_mask = 0
 
-	# Добавляем в группу buildings для валидации превью
 	add_to_group("buildings")
+	
+	# ИСПРАВЛЕНИЕ: Принудительно отвязываем якоря, чтобы ColorRect не схлопывался в 0x0
+	if color_rect:
+		color_rect.set_anchors_preset(Control.PRESET_TOP_LEFT, true)
+		color_rect.visible = true
 
-	# Настройка формы и коллизии под размеры здания
+	# Настройка формы и коллизии под уникальные размеры здания
 	_apply_dimensions(building_size)
 
 	if progress_bar:
@@ -94,6 +98,10 @@ func unassign_worker(ant: AntBase) -> void:
 	# Если рабочих стало меньше требуемого — стройка возвращается в режим ожидания
 	if assigned_workers.size() < required_workers and current_state == BuildState.UNDER_CONSTRUCTION:
 		current_state = BuildState.BLUEPRINT
+		
+		# Запрашиваем замену у менеджера колонии
+		if is_instance_valid(ColonyManager):
+			ColonyManager.call_deferred("check_pending_constructions")
 
 	_update_ui_state()
 
@@ -104,7 +112,6 @@ func _on_worker_died(ant: AntBase) -> void:
 
 ## Расчет темпа строительства
 func _process_construction(delta: float) -> void:
-	# GDD Раздел 4.2: Муравей-рабочий (ant_worker) имеет бонус +15% к скорости строительства
 	var speed_multiplier: float = 0.0
 
 	for worker in assigned_workers:
@@ -133,10 +140,11 @@ func _complete_construction() -> void:
 	# Здание становится плотным/непрозрачным
 	_set_visual_alpha(1.0)
 
-	# Освобождаем строителей от работы
-	for worker in assigned_workers:
+	var workers_to_free = assigned_workers.duplicate()
+	for worker in workers_to_free:
 		if is_instance_valid(worker):
 			worker.finish_work()
+			
 	assigned_workers.clear()
 
 	_update_ui_state()
@@ -148,7 +156,7 @@ func _complete_construction() -> void:
 	_on_operational_ready()
 
 
-## Переопределяется в конкретных типах комнат (Shelter, Stockpile, Farm и т.д.)
+## Переопределяется в конкретных типах комнат
 func _on_operational_ready() -> void:
 	pass
 
