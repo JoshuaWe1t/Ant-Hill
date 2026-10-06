@@ -1,0 +1,79 @@
+[gd_scene load_steps=3 format=3 uid="uid://b7wiohv11g8jk"]
+
+[ext_resource type="Script" uid="uid://cgqyo5pqylmtw" path="res://ui/queen_commands_ui/queen_commands_ui.gd" id="1_5l0fo"]
+[ext_resource type="Texture2D" uid="uid://dnhnf74yu2krq" path="res://icon.svg" id="2_18wi2"]
+
+[node name="QueenCommandsUI" type="CanvasLayer"]
+script = ExtResource("1_5l0fo")
+
+[node name="MainPanel" type="Panel" parent="."]
+offset_left = 185.0
+offset_top = 586.0
+offset_right = 455.0
+offset_bottom = 706.0
+
+[node name="VBox" type="VBoxContainer" parent="MainPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BtnScout" type="Button" parent="MainPanel/VBox"]
+layout_mode = 2
+text = "Разведка"
+
+[node name="BtnForage" type="Button" parent="MainPanel/VBox"]
+layout_mode = 2
+text = "Сбор ресурсов"
+
+[node name="BtnSpawn" type="Button" parent="MainPanel/VBox"]
+layout_mode = 2
+text = "Пополнение"
+
+[node name="SpawnPopup" type="Panel" parent="."]
+offset_left = 219.0
+offset_top = 490.0
+offset_right = 419.0
+offset_bottom = 570.0
+
+[node name="VBox" type="VBoxContainer" parent="SpawnPopup"]
+visible = false
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Label" type="Label" parent="SpawnPopup/VBox"]
+layout_mode = 2
+text = "1 - Рабочий | 2 - Солдат | 3 - Нянька"
+
+[node name="HBox" type="HBoxContainer" parent="SpawnPopup"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="BtnWorker" type="TextureButton" parent="SpawnPopup/HBox"]
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+texture_normal = ExtResource("2_18wi2")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="BtnSoldier" type="TextureButton" parent="SpawnPopup/HBox"]
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+texture_normal = ExtResource("2_18wi2")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="BtnBabysitter" type="TextureButton" parent="SpawnPopup/HBox"]
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+texture_normal = ExtResource("2_18wi2")
+ignore_texture_size = true
+stretch_mode = 5
