@@ -4,12 +4,14 @@ extends CharacterBody2D
 signal died(ant_instance: AntBase)
 
 enum State {
-	IDLE,           # Ожидание / легкое блуждание
+	IDLE,             # Ожидание / легкое блуждание
 	WANDER,
-	MOVE_TO,        # Перемещение к цели (здание, чанк, склад)
-	MOVE_TO_BUILD,  # Движение к стройплощадке
-	WORK,           # Выполнение работы (строительство, уход за куколками)
-	DEAD            # Состояние смерти
+	MOVE_TO,          # Перемещение к цели (здание, чанк, склад)
+	MOVE_TO_BUILD,    # Движение к стройплощадке
+	WORK,             # Выполнение работы (строительство, уход за куколками)
+	DEAD,             # Состояние смерти
+	SCOUTING,         # Разведка чанка
+	FORAGING          # Поиск ресурсов
 }
 
 # --- Параметры по GDD (Раздел 4.2) ---
@@ -44,8 +46,13 @@ var target_position: Vector2 = Vector2.ZERO
 var arrive_distance: float = 8.0
 var wander_timer: float = 0.0
 
+var target_chunk_to_scout: Chunk = null
+
+var task_timer: float = 0.0
+var current_task_type: State = State.IDLE
+
 # Строительство
-var current_workplace: BuildingBase = null
+var current_workplace: Node = null # Убрали строгую привязку к BuildingBase
 var build_interaction_distance: float = 40.0 ## Дистанция касания стройплощадки
 
 @onready var sprite_2d: Sprite2D = $Sprite2D
@@ -109,17 +116,13 @@ func _apply_stats_from_gdd() -> void:
 
 func _physics_process(delta: float) -> void:
 	match current_state:
-		State.IDLE:
-			_process_idle(delta)
-		State.MOVE_TO:
-			_process_move_to(delta)
-		State.MOVE_TO_BUILD:
-			_process_move_to_build(delta)
-		State.WORK:
-			_process_work(delta)
-		State.DEAD:
-			velocity = Vector2.ZERO
-
+		State.IDLE: _process_idle(delta)
+		State.MOVE_TO: _process_move_to(delta)
+		State.MOVE_TO_BUILD: _process_move_to_build(delta)
+		State.WORK: _process_work(delta)
+		State.SCOUTING: _process_scouting(delta)
+		State.FORAGING: _process_field_task(delta)
+		State.DEAD: velocity = Vector2.ZERO
 	move_and_slide()
 
 
@@ -166,7 +169,7 @@ func _process_move_to_build(_delta: float) -> void:
 			# Если на стройке уже заняты все 2 места
 			finish_work()
 	else:
-		var dir := (current_workplace.global_position - global_position).normalized()
+		var dir: Vector2 = (current_workplace.global_position - global_position).normalized()
 		velocity = dir * move_speed
 		_flip_sprite(dir.x)
 
@@ -174,13 +177,14 @@ func _process_move_to_build(_delta: float) -> void:
 ## 4. Поведение WORK: непосредственная работа на стройке
 func _process_work(_delta: float) -> void:
 	velocity = Vector2.ZERO
-	# Если стройка завершена, удалена или отменена — освобождаемся
-	if not is_instance_valid(current_workplace) or current_workplace.current_state == BuildingBase.BuildState.OPERATIONAL:
+	# Если стройка завершена, удалена или отменена — освобождаемся. 
+	# Значение 2 соответствует состоянию OPERATIONAL
+	if not is_instance_valid(current_workplace) or ("current_state" in current_workplace and current_workplace.current_state == 2):
 		finish_work()
 
 
 ## Приказ от ColonyManager отправиться строить объект
-func assign_to_construction(building: BuildingBase) -> void:
+func assign_to_construction(building: Node2D) -> void: 
 	current_workplace = building
 	target_position = building.global_position
 	_set_state(State.MOVE_TO_BUILD)
@@ -192,6 +196,10 @@ func finish_work() -> void:
 		current_workplace.unassign_worker(self)
 	current_workplace = null
 	_set_state(State.IDLE)
+	
+	# Как только муравей освободился, просим диспетчера проверить другие чертежи
+	if ant_type == Cocoon.AntType.WORKER and is_instance_valid(ColonyManager):
+		ColonyManager.call_deferred("check_pending_constructions")
 
 
 ## Приказ на перемещение в конкретную точку
@@ -236,6 +244,8 @@ func _set_state(new_state: State) -> void:
 			State.MOVE_TO: state_label.text = "Move"
 			State.MOVE_TO_BUILD: state_label.text = "To Build"
 			State.WORK: state_label.text = "Build"
+			State.SCOUTING: state_label.text = "Scouting"
+			State.FORAGING: state_label.text = "Foraging"
 			State.DEAD: state_label.text = "Dead"
 
 
@@ -261,6 +271,7 @@ func _flip_sprite(dir_x: float) -> void:
 		sprite.scale.x = abs(sprite.scale.x) if dir_x > 0 else -abs(sprite.scale.x)
 
 
+# СТАРЫЙ КОММЕНТАРИЙ С ТЕКСТУРАМИ СОХРАНЕН ПОЛНОСТЬЮ:
 #func _apply_visuals() -> void:
 	#if not sprite_2d:
 		#return
@@ -309,3 +320,80 @@ func _get_random_point_in_chunk() -> Vector2:
 
 	var random_dir := Vector2.from_angle(randf_range(0.0, TAU))
 	return global_position + (random_dir * randf_range(15.0, 45.0))
+
+
+## Поведение SCOUTING: целевой бег к выбранному чанку и патрулирование его территории
+func _process_scouting(delta: float) -> void:
+	task_timer -= delta
+
+	# Если целевой чанк существует, генерируем точки строго внутри его границ
+	if target_chunk_to_scout and is_instance_valid(target_chunk_to_scout):
+		wander_timer -= delta
+		if global_position.distance_to(target_position) < arrive_distance or wander_timer <= 0.0:
+			target_position = _get_random_point_in_specific_chunk(target_chunk_to_scout)
+			wander_timer = randf_range(3.0, 6.0)
+
+	# Движение к текущей точке внутри чанка с полной скоростью
+	if global_position.distance_to(target_position) > arrive_distance:
+		var dir: Vector2 = (target_position - global_position).normalized()
+		velocity = dir * move_speed
+		_flip_sprite(dir.x)
+	else:
+		velocity = Vector2.ZERO
+
+	# Когда время разведки (45 сек) вышло
+	if task_timer <= 0.0:
+		if is_instance_valid(target_chunk_to_scout):
+			target_chunk_to_scout.complete_scouting()
+			
+		if is_instance_valid(ColonyManager):
+			ColonyManager.call_deferred("complete_ant_task", self, current_task_type)
+			
+		target_chunk_to_scout = null
+		_set_state(State.IDLE)
+
+
+## Генерация случайной точки внутри КОНКРЕТНОГО целевого чанка разведки
+func _get_random_point_in_specific_chunk(chunk: Chunk) -> Vector2:
+	var margin: float = 16.0
+	var min_x: float = chunk.global_position.x + margin
+	var max_x: float = chunk.global_position.x + chunk.chunk_size.x - margin
+	var min_y: float = chunk.global_position.y + margin
+	var max_y: float = chunk.global_position.y + chunk.chunk_size.y - margin
+
+	if min_x < max_x and min_y < max_y:
+		return Vector2(randf_range(min_x, max_x), randf_range(min_y, max_y))
+	return chunk.global_position
+
+
+## Выполнение сбора ресурсов (свободное блуждание)
+func _process_field_task(delta: float) -> void:
+	task_timer -= delta
+	
+	wander_timer -= delta
+	if wander_timer <= 0.0:
+		var random_dir := Vector2.from_angle(randf_range(0.0, TAU))
+		target_position = global_position + (random_dir * randf_range(20.0, 50.0))
+		wander_timer = randf_range(2.0, 4.0)
+
+	if global_position.distance_to(target_position) > arrive_distance:
+		var dir := (target_position - global_position).normalized()
+		velocity = dir * (move_speed * 0.5)
+		_flip_sprite(dir.x)
+	else:
+		velocity = Vector2.ZERO
+
+	if task_timer <= 0.0:
+		if is_instance_valid(ColonyManager):
+			ColonyManager.call_deferred("complete_ant_task", self, current_task_type)
+			
+		_set_state(State.IDLE)
+
+
+## Приказ на выполнение длительной задачи
+func start_field_task(task_state: State, duration: float, target_pos: Vector2, target_chunk: Chunk = null) -> void:
+	task_timer = duration
+	current_task_type = task_state
+	target_position = target_pos
+	target_chunk_to_scout = target_chunk
+	_set_state(task_state)
