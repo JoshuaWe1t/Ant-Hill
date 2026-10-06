@@ -33,3 +33,23 @@ signal building_placement_requested(building_id: String)
 signal building_placed(building_instance: Node2D)
 @warning_ignore("unused_signal")
 signal building_construction_finished(building_instance: Node2D)
+
+# Сигнал для активации/скрытия меню (через клавишу B или выбор королевы)
+@warning_ignore("unused_signal")
+signal toggle_build_menu(is_open: bool)
+
+# Сигнал запроса на старт превью постройки из меню
+@warning_ignore("unused_signal")
+signal build_button_pressed(building_id: String)
+
+# Сигнал отправляется при клике на иконку королевы в интерфейсе
+@warning_ignore("unused_signal")
+signal ui_queen_icon_clicked
+
+# Управление меню команд Королевы
+@warning_ignore("unused_signal")
+signal toggle_queen_commands(is_open: bool)
+
+# Режим выбора чанка для разведки
+@warning_ignore("unused_signal")
+signal toggle_scout_mode(is_active: bool)
