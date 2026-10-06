@@ -1,0 +1,66 @@
+[gd_scene load_steps=4 format=3 uid="uid://p50waydatu51"]
+
+[ext_resource type="Script" uid="uid://c6r4kolrqmpbc" path="res://ui/build_menu/build_menu.gd" id="1_gtbot"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5bkti"]
+bg_color = Color(0.3491902, 0.3491902, 0.3491902, 0.70000005)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gtbot"]
+bg_color = Color(0.48452926, 0.48452926, 0.48452926, 0.90000004)
+
+[node name="BuildMenu" type="CanvasLayer"]
+script = ExtResource("1_gtbot")
+
+[node name="MainControl" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="BuildPanel" type="Panel" parent="MainControl"]
+layout_mode = 0
+offset_left = 470.0
+offset_top = 750.0
+offset_right = 1270.0
+offset_bottom = 870.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_5bkti")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MainControl/BuildPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 8.0
+offset_right = -14.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MainControl/BuildPanel/ScrollContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TooltipPanel" type="PanelContainer" parent="MainControl"]
+layout_mode = 0
+offset_top = 400.0
+offset_right = 40.0
+offset_bottom = 477.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_gtbot")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainControl/TooltipPanel"]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="MainControl/TooltipPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="DescLabel" type="Label" parent="MainControl/TooltipPanel/VBoxContainer"]
+layout_mode = 2
+autowrap_mode = 2
+
+[node name="ReqLabel" type="Label" parent="MainControl/TooltipPanel/VBoxContainer"]
+layout_mode = 2
+autowrap_mode = 2
