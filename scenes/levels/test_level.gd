@@ -12,6 +12,9 @@ var queen: Queen = null
 var nest: Nest = null
 var current_preview: BuildingPreview = null
 var current_selected_building_id: String = "shelter"
+var is_build_mode: bool = false
+var is_commands_mode: bool = false
+var is_scouting_mode: bool = false # Ждем ли мы клика по чанку
 
 func _ready() -> void:
 	if not entities_container:
@@ -38,10 +41,27 @@ func _ready() -> void:
 	queen.global_position = spawn_pos
 	queen.home_nest = nest
 	entities_container.add_child(queen)
+	
+	# Подключение глобальных сигналов с проверкой
+	if is_instance_valid(EventBus):
+		if not EventBus.build_button_pressed.is_connected(_on_ui_build_requested):
+			EventBus.build_button_pressed.connect(_on_ui_build_requested)
+			
+		if not EventBus.toggle_scout_mode.is_connected(_on_scout_mode_toggled):
+			EventBus.toggle_scout_mode.connect(_on_scout_mode_toggled)
+			
+		# Безопасное подключение клика по чанку (сигнал должен быть объявлен в EventBus)
+		if EventBus.has_signal("chunk_clicked") and not EventBus.is_connected("chunk_clicked", _on_chunk_clicked):
+			EventBus.chunk_clicked.connect(_on_chunk_clicked)
 
 
-## Обработка мыши с наивысшим приоритетом (до того, как ее перехватит Queen или UI)
+## Обработка мыши с наивысшим приоритетом
 func _input(event: InputEvent) -> void:
+	# Если включен режим разведки, клик ЛКМ перехватывается для выбора чанка
+	if is_scouting_mode and event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed():
+		# Клик обрабатывается через сигнал самого чанка (_on_chunk_clicked)
+		return
+
 	if not is_instance_valid(current_preview):
 		return
 
@@ -59,49 +79,42 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 
-## Обработка клавиатуры (клавиши B, T)
+## Обработка клавиатуры
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.is_pressed():
+		
+		# Клавиша B: Меню строительства
 		if event.keycode == KEY_B:
-			_toggle_test_preview()
+			is_build_mode = !is_build_mode
+			if is_instance_valid(EventBus):
+				EventBus.toggle_build_menu.emit(is_build_mode)
 			get_viewport().set_input_as_handled()
+			
 		elif event.keycode == KEY_T:
 			ResourceManager.add_resources({
 				ResourceManager.ResourceType.WOOD: 50,
 				ResourceManager.ResourceType.CLAY: 20
 			})
 			print("Тест: начислены ресурсы")
+			
+		# Горячие клавиши для превью
 		elif event.keycode == KEY_3: _start_preview_for("shelter")
 		elif event.keycode == KEY_4: _start_preview_for("stockpile")
 		elif event.keycode == KEY_5: _start_preview_for("kindergarten")
 		elif event.keycode == KEY_6: _start_preview_for("aphid_farm")
 
-		# Нажмите 1 — запустить создание рабочего
+		# Спавн муравьев
 		if event.keycode == KEY_1:
 			queen.produce_cocoon(Cocoon.AntType.WORKER)
-		# Нажмите 2 — запустить создание солдата
 		elif event.keycode == KEY_2:
 			queen.produce_cocoon(Cocoon.AntType.SOLDIER)
-
-func _toggle_test_preview() -> void:
-	if is_instance_valid(current_preview):
-		_cancel_preview()
-		return
-
-	if not preview_scene:
-		push_error("В TestLevel не назначена preview_scene!")
-		return
-
-	current_preview = preview_scene.instantiate()
-	add_child(current_preview)
-
-	# Тестовые данные Укрытия по GDD (Раздел 4.2): 200x200 px, 10 Дерево, 2 Глина[cite: 7]
-	var test_size := Vector2(200, 200)
-	var test_cost := {
-		ResourceManager.ResourceType.WOOD: 10,
-		ResourceManager.ResourceType.CLAY: 2
-	}
-	current_preview.setup("shelter", test_size, test_cost)
+		
+		# Клавиша C: Меню команд Королевы
+		elif event.keycode == KEY_C:
+			is_commands_mode = !is_commands_mode
+			if is_instance_valid(EventBus):
+				EventBus.toggle_queen_commands.emit(is_commands_mode)
+			get_viewport().set_input_as_handled()
 
 
 func _cancel_preview() -> void:
@@ -110,57 +123,34 @@ func _cancel_preview() -> void:
 		current_preview = null
 
 
-#func _confirm_placement() -> void:
-	#if not current_preview or not building_base_scene:
-		#push_error("Ошибка: нет active_preview или building_base_scene!")
-		#return
-#
-	## 1. Проверяем и списываем ресурсы колонии (GDD Раздел 2.1)[cite: 2]
-	#if not ResourceManager.spend_resources(current_preview.build_cost):
-		#print("Недостаточно ресурсов для строительства! Требовалось: ", current_preview.build_cost)
-		#return
-#
-	## 2. Создаем чертеж здания (GDD Раздел 4.2)[cite: 7]
-	#var new_building: BuildingBase = building_base_scene.instantiate()
-	#new_building.global_position = current_preview.global_position
-	#new_building.building_name = "Укрытие"
-	#new_building.build_duration = 30.0 # 30 сек по GDD[cite: 7]
-	#new_building.building_size = current_preview.building_size
-	#
-	#entities_container.add_child(new_building)
-	#print("Чертеж здания успешно установлен на позиции: ", new_building.global_position)
-#
-	## 3. Закрываем режим превью
-	#_cancel_preview()
-
-
 func _confirm_placement() -> void:
-	if not current_preview or not building_base_scene:
+	if not current_preview:
 		return
 
-	# 1. Проверяем и списываем ресурсы колонии
+	var data: Dictionary = BuildingDatabase.DATA[current_selected_building_id]
+
 	if not ResourceManager.spend_resources(current_preview.build_cost):
 		print("Недостаточно ресурсов для постройки!")
 		return
 
-	# 2. Создаем чертеж здания
-	var new_building: BuildingBase = building_base_scene.instantiate()
+	var new_building: BuildingBase = data.scene.instantiate()
 	new_building.global_position = current_preview.global_position
-	new_building.building_name = "Укрытие"
-	new_building.build_duration = 30.0 # 30 сек по GDD
-	new_building.building_size = current_preview.building_size
-
+	new_building.building_size = data.size
+	
 	entities_container.add_child(new_building)
-	print("Чертеж установлен: ", new_building.global_position)
+	print("Установлен чертеж здания: ", data.name)
 
-	# 3. Ищем и отправляем ровно 2 свободных рабочих по GDD[cite: 7]
 	if is_instance_valid(ColonyManager):
 		var sent: int = ColonyManager.dispatch_workers_to(new_building, 2)
 		if sent < 2:
 			print("Внимание: Найдено только %d свободных рабочих из 2!" % sent)
 
-	# 4. Закрываем превью
 	_cancel_preview()
+	
+	if is_build_mode:
+		is_build_mode = false
+		if is_instance_valid(EventBus):
+			EventBus.toggle_build_menu.emit(false)
 
 
 func _start_preview_for(bldg_id: String) -> void:
@@ -171,3 +161,38 @@ func _start_preview_for(bldg_id: String) -> void:
 	current_preview = preview_scene.instantiate()
 	add_child(current_preview)
 	current_preview.setup(data.id, data.size, data.cost)
+
+
+func _on_ui_build_requested(bldg_id: String) -> void:
+	_cancel_preview()
+	
+	if not preview_scene:
+		push_error("В TestLevel не назначена preview_scene!")
+		return
+
+	current_selected_building_id = bldg_id
+	var data: Dictionary = BuildingDatabase.DATA[bldg_id]
+	
+	current_preview = preview_scene.instantiate()
+	add_child(current_preview)
+	current_preview.setup(data.id, data.size, data.cost)
+
+
+func _on_scout_mode_toggled(is_active: bool) -> void:
+	is_scouting_mode = is_active
+	print("Режим ожидания выбора чанка для разведки: ", is_scouting_mode)
+
+
+## Обработка клика по чанку
+func _on_chunk_clicked(chunk: Chunk) -> void:
+	if not is_scouting_mode:
+		return
+
+	if is_instance_valid(ColonyManager) and chunk.can_be_scouted():
+		var success = ColonyManager.dispatch_scouts_to_chunk(chunk)
+		if success:
+			is_scouting_mode = false
+			if is_instance_valid(EventBus):
+				EventBus.toggle_scout_mode.emit(false)
+	else:
+		print("Нельзя исследовать этот чанк! Выберите закрытый чанк, граничащий с открытым.")

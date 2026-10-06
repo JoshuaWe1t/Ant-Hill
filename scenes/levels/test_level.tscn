@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://bsk1xkrns6upr"]
+[gd_scene load_steps=13 format=3 uid="uid://bsk1xkrns6upr"]
 
 [ext_resource type="Script" uid="uid://q0s66hxbnols" path="res://scenes/levels/test_level.gd" id="1_6xh4u"]
 [ext_resource type="Script" uid="uid://busce5ef8ra8q" path="res://entities/world/chunk_manager.gd" id="1_48ne7"]
@@ -9,6 +9,9 @@
 [ext_resource type="PackedScene" uid="uid://cwtl2tc8taycv" path="res://entities/buildings/building_preview/building_preview.tscn" id="4_hfwtw"]
 [ext_resource type="PackedScene" uid="uid://cdoeypllfriql" path="res://entities/buildings/building_base/building_base.tscn" id="5_2mu0v"]
 [ext_resource type="PackedScene" uid="uid://bvqqyi2svol2k" path="res://ui/hud/hud.tscn" id="5_hfwtw"]
+[ext_resource type="PackedScene" uid="uid://p50waydatu51" path="res://ui/build_menu/build_menu.tscn" id="10_2mu0v"]
+[ext_resource type="PackedScene" uid="uid://baovp2abgxyll" path="res://ui/queen_icon/queen_icon.tscn" id="11_jmx14"]
+[ext_resource type="PackedScene" uid="uid://b7wiohv11g8jk" path="res://ui/queen_commands_ui/queen_commands_ui.tscn" id="12_eaa0b"]
 
 [node name="TestLevel" type="Node2D"]
 script = ExtResource("1_6xh4u")
@@ -31,4 +34,10 @@ starter_chunk_size = Vector2(750, 400)
 
 [node name="HUD" parent="." instance=ExtResource("5_hfwtw")]
 
+[node name="BuildMenu" parent="." instance=ExtResource("10_2mu0v")]
+
 [node name="Entities" type="Node2D" parent="."]
+
+[node name="QueenIcon" parent="." instance=ExtResource("11_jmx14")]
+
+[node name="QueenCommandsUI" parent="." instance=ExtResource("12_eaa0b")]
