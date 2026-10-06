@@ -81,6 +81,9 @@ func _ready() -> void:
 	if not input_event.is_connected(_on_input_event):
 		input_event.connect(_on_input_event)
 	
+	if is_instance_valid(EventBus):
+		EventBus.ui_queen_icon_clicked.connect(_on_ui_icon_clicked)
+	
 	print("Королева инициализирована. Pickable: ", input_pickable)
 
 
@@ -250,7 +253,7 @@ func produce_cocoon(type: Cocoon.AntType) -> bool:
 
 	var cost: Dictionary = SPAWN_COSTS.get(type, {})
 	
-	# 2. Проверяем и списываем ресурсы (GDD Раздел 4.2)[cite: 7]
+	# 2. Проверяефм и списываем ресурсы (GDD Раздел 4.2)[cite: 7]
 	if not ResourceManager.spend_resources(cost):
 		print("Недостаточно ресурсов для создания муравья!")
 		return false
@@ -331,3 +334,10 @@ func _on_upkeep_tick() -> void:
 			EventBus.queen_fed.emit()
 		else:
 			print("Королева сыта, здоровье на максимуме.")
+
+
+# Добавьте эту новую функцию в конец скрипта
+func _on_ui_icon_clicked() -> void:
+	if current_health > 0:
+		select_queen()
+		print("Королева выбрана через UI-иконку!")
