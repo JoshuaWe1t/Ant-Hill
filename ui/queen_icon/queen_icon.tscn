@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3 uid="uid://baovp2abgxyll"]
+
+[ext_resource type="Script" uid="uid://cikf0eyl75qws" path="res://ui/queen_icon/queen_icon.gd" id="1_r2iqf"]
+[ext_resource type="Texture2D" uid="uid://dnhnf74yu2krq" path="res://icon.svg" id="2_psufd"]
+
+[node name="QueenIcon" type="CanvasLayer"]
+script = ExtResource("1_r2iqf")
+sprite_healthy = ExtResource("2_psufd")
+sprite_damaged = ExtResource("2_psufd")
+sprite_critical = ExtResource("2_psufd")
+sprite_dead = ExtResource("2_psufd")
+
+[node name="TextureButton" type="TextureButton" parent="."]
+offset_left = 10.0
+offset_top = 560.0
+offset_right = 160.0
+offset_bottom = 710.0
+ignore_texture_size = true
+stretch_mode = 5
