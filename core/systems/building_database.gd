@@ -9,7 +9,11 @@ static var DATA: Dictionary = {
 			ResourceManager.ResourceType.WOOD: 10,
 			ResourceManager.ResourceType.CLAY: 2
 		},
-		"scene": preload("res://entities/buildings/shelter/shelter.tscn")
+		"scene": preload("res://entities/buildings/shelter/shelter.tscn"),
+		"texture": preload("res://icon.svg"),
+		"description": "DESCRIPTION OF BUILDING",
+		"workers_needed": 2,
+		"build_duration": 30
 	},
 	"stockpile": {
 		"id": "stockpile",
@@ -20,7 +24,11 @@ static var DATA: Dictionary = {
 			ResourceManager.ResourceType.CLAY: 10,
 			ResourceManager.ResourceType.RESIN: 5
 		},
-		"scene": preload("res://entities/buildings/stockpile/stockpile.tscn")
+		"scene": preload("res://entities/buildings/stockpile/stockpile.tscn"),
+		"texture": preload("res://icon.svg"),
+		"description": "DESCRIPTION OF BUILDING",
+		"workers_needed": 2,
+		"build_duration": 35
 	},
 	"kindergarten": {
 		"id": "kindergarten",
@@ -31,7 +39,11 @@ static var DATA: Dictionary = {
 			ResourceManager.ResourceType.WOOD: 15,
 			ResourceManager.ResourceType.CLAY: 5
 		},
-		"scene": preload("res://entities/buildings/ants_kindergarten/ants_kindergarten.tscn")
+		"scene": preload("res://entities/buildings/ants_kindergarten/ants_kindergarten.tscn"),
+		"texture": preload("res://icon.svg"),
+		"description": "DESCRIPTION OF BUILDING",
+		"workers_needed": 2,
+		"build_duration": 45
 	},
 	"aphid_farm": {
 		"id": "aphid_farm",
@@ -45,6 +57,10 @@ static var DATA: Dictionary = {
 			ResourceManager.ResourceType.CLAY: 2,
 			ResourceManager.ResourceType.RESIN: 2
 		},
-		"scene": preload("res://entities/buildings/aphid_farm/aphid_farm.tscn")
+		"scene": preload("res://entities/buildings/aphid_farm/aphid_farm.tscn"),
+		"texture": preload("res://icon.svg"),
+		"description": "DESCRIPTION OF BUILDING",
+		"workers_needed": 2,
+		"build_duration": 50
 	}
 }
