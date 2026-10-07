@@ -42,6 +42,9 @@ func _ready() -> void:
 	queen.home_nest = nest
 	entities_container.add_child(queen)
 	
+	# Спавним стартовых муравьев в гнезде
+	ColonyManager.spawn_initial_colony()
+	
 	# Подключение глобальных сигналов с проверкой
 	if is_instance_valid(EventBus):
 		if not EventBus.build_button_pressed.is_connected(_on_ui_build_requested):
@@ -53,6 +56,14 @@ func _ready() -> void:
 		# Безопасное подключение клика по чанку (сигнал должен быть объявлен в EventBus)
 		if EventBus.has_signal("chunk_clicked") and not EventBus.is_connected("chunk_clicked", _on_chunk_clicked):
 			EventBus.chunk_clicked.connect(_on_chunk_clicked)
+	
+	# Настраиваем условия победы для этого конкретного уровня
+	if is_instance_valid(VictoryManager):
+		VictoryManager.active_condition = VictoryManager.VictoryConditionType.SPECIFIC_ANT_TYPE
+		VictoryManager.target_ant_type = Cocoon.AntType.SOLDIER # Например, нужны солдаты
+		VictoryManager.target_ant_type_count = 5 # Нужно 5 штук
+		
+		VictoryManager.goal_updated.emit()
 
 
 ## Обработка мыши с наивысшим приоритетом
@@ -90,24 +101,24 @@ func _unhandled_input(event: InputEvent) -> void:
 				EventBus.toggle_build_menu.emit(is_build_mode)
 			get_viewport().set_input_as_handled()
 			
-		elif event.keycode == KEY_T:
-			ResourceManager.add_resources({
-				ResourceManager.ResourceType.WOOD: 50,
-				ResourceManager.ResourceType.CLAY: 20
-			})
-			print("Тест: начислены ресурсы")
-			
-		# Горячие клавиши для превью
-		elif event.keycode == KEY_3: _start_preview_for("shelter")
-		elif event.keycode == KEY_4: _start_preview_for("stockpile")
-		elif event.keycode == KEY_5: _start_preview_for("kindergarten")
-		elif event.keycode == KEY_6: _start_preview_for("aphid_farm")
+		#elif event.keycode == KEY_T:
+			#ResourceManager.add_resources({
+				#ResourceManager.ResourceType.WOOD: 50,
+				#ResourceManager.ResourceType.CLAY: 20
+			#})
+			#print("Тест: начислены ресурсы")
+			#
+		## Горячие клавиши для превью
+		#elif event.keycode == KEY_3: _start_preview_for("shelter")
+		#elif event.keycode == KEY_4: _start_preview_for("stockpile")
+		#elif event.keycode == KEY_5: _start_preview_for("kindergarten")
+		#elif event.keycode == KEY_6: _start_preview_for("aphid_farm")
 
-		# Спавн муравьев
-		if event.keycode == KEY_1:
-			queen.produce_cocoon(Cocoon.AntType.WORKER)
-		elif event.keycode == KEY_2:
-			queen.produce_cocoon(Cocoon.AntType.SOLDIER)
+		## Спавн муравьев
+		#if event.keycode == KEY_1:
+			#queen.produce_cocoon(Cocoon.AntType.WORKER)
+		#elif event.keycode == KEY_2:
+			#queen.produce_cocoon(Cocoon.AntType.SOLDIER)
 		
 		# Клавиша C: Меню команд Королевы
 		elif event.keycode == KEY_C:
