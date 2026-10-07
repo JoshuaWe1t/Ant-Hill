@@ -53,3 +53,6 @@ signal toggle_queen_commands(is_open: bool)
 # Режим выбора чанка для разведки
 @warning_ignore("unused_signal")
 signal toggle_scout_mode(is_active: bool)
+
+@warning_ignore("unused_signal")
+signal show_notification(message: String)
