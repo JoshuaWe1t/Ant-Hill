@@ -322,18 +322,25 @@ func _get_random_point_in_chunk() -> Vector2:
 	return global_position + (random_dir * randf_range(15.0, 45.0))
 
 
-## Поведение SCOUTING: целевой бег к выбранному чанку и патрулирование его территории
+## Поведение SCOUTING: строгий бег к выбранному чанку и раскопки внутри него
 func _process_scouting(delta: float) -> void:
 	task_timer -= delta
 
-	# Если целевой чанк существует, генерируем точки строго внутри его границ
 	if target_chunk_to_scout and is_instance_valid(target_chunk_to_scout):
-		wander_timer -= delta
-		if global_position.distance_to(target_position) < arrive_distance or wander_timer <= 0.0:
-			target_position = _get_random_point_in_specific_chunk(target_chunk_to_scout)
-			wander_timer = randf_range(3.0, 6.0)
+		# Определяем физические границы целевого чанка
+		var chunk_rect := Rect2(target_chunk_to_scout.global_position, target_chunk_to_scout.chunk_size)
+		
+		# Если муравей еще НЕ пересек границу чанка — заставляем бежать ровно в его центр
+		if not chunk_rect.has_point(global_position):
+			target_position = target_chunk_to_scout.global_position + (target_chunk_to_scout.chunk_size / 2.0)
+		else:
+			# Если муравей уже ВНУТРИ чанка — начинаем перебежки (копаем породу)
+			wander_timer -= delta
+			if global_position.distance_to(target_position) < arrive_distance or wander_timer <= 0.0:
+				target_position = _get_random_point_in_specific_chunk(target_chunk_to_scout)
+				wander_timer = randf_range(3.0, 6.0)
 
-	# Движение к текущей точке внутри чанка с полной скоростью
+	# Движение к цели
 	if global_position.distance_to(target_position) > arrive_distance:
 		var dir: Vector2 = (target_position - global_position).normalized()
 		velocity = dir * move_speed
@@ -341,7 +348,7 @@ func _process_scouting(delta: float) -> void:
 	else:
 		velocity = Vector2.ZERO
 
-	# Когда время разведки (45 сек) вышло
+	# Завершение работы по таймеру
 	if task_timer <= 0.0:
 		if is_instance_valid(target_chunk_to_scout):
 			target_chunk_to_scout.complete_scouting()
