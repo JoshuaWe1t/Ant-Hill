@@ -6,6 +6,70 @@
 [node name="QueenCommandsUI" type="CanvasLayer"]
 script = ExtResource("1_5l0fo")
 
+[node name="ForagePopup" type="Panel" parent="."]
+offset_left = 166.0
+offset_top = 382.0
+offset_right = 475.0
+offset_bottom = 577.0
+
+[node name="VBox" type="VBoxContainer" parent="ForagePopup"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -156.5
+offset_top = -95.5
+offset_right = 156.5
+offset_bottom = 98.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="ForagePopup/VBox"]
+layout_mode = 2
+text = "Выберите ресурсы для сбора:"
+horizontal_alignment = 1
+
+[node name="Grid" type="GridContainer" parent="ForagePopup/VBox"]
+layout_mode = 2
+columns = 3
+
+[node name="CheckWater" type="CheckBox" parent="ForagePopup/VBox/Grid"]
+layout_mode = 2
+text = "Вода"
+
+[node name="CheckProtein" type="CheckBox" parent="ForagePopup/VBox/Grid"]
+layout_mode = 2
+text = "Протеин"
+
+[node name="CheckPhytomass" type="CheckBox" parent="ForagePopup/VBox/Grid"]
+layout_mode = 2
+text = "Фитомасса"
+
+[node name="CheckWood" type="CheckBox" parent="ForagePopup/VBox/Grid"]
+layout_mode = 2
+text = "Дерево"
+
+[node name="CheckClay" type="CheckBox" parent="ForagePopup/VBox/Grid"]
+layout_mode = 2
+text = "Глина"
+
+[node name="CheckResin" type="CheckBox" parent="ForagePopup/VBox/Grid"]
+layout_mode = 2
+text = "Смола"
+
+[node name="CheckSilk" type="CheckBox" parent="ForagePopup/VBox/Grid"]
+layout_mode = 2
+text = "Шелк"
+
+[node name="BtnDispatch" type="TextureButton" parent="ForagePopup/VBox"]
+custom_minimum_size = Vector2(100, 40)
+layout_mode = 2
+texture_normal = ExtResource("2_18wi2")
+ignore_texture_size = true
+stretch_mode = 5
+
 [node name="MainPanel" type="Panel" parent="."]
 offset_left = 185.0
 offset_top = 586.0
