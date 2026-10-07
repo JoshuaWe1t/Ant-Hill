@@ -4,17 +4,10 @@ extends Node2D
 @export var chunk_scene: PackedScene
 @export var ground_y_level: float = 0.0 ## Линия поверхности (земли)
 
-# Стартовый чанк
-@export var starter_chunk_size: Vector2 = Vector2(300, 300)
-
-# Варианты форм для процедурной генерации комнат муравейника
-var chunk_shapes: Array[Vector2] = [
-	Vector2(200, 200), # Квадрат поменьше
-	Vector2(300, 300), # Стандартный квадрат
-	Vector2(450, 200), # Длинный горизонтальный тоннель/галерея
-	Vector2(200, 400), # Вертикальная шахта
-	Vector2(350, 250)  # Прямоугольная средняя камера
-]
+# Настройки плотной сетки чанков
+@export var grid_columns: int = 8 ## Четное число, чтобы чанк 2х2 стоял ровно по центру
+@export var grid_rows: int = 5    ## Глубина подземного мира (в чанках)
+@export var cell_size: Vector2 = Vector2(256, 256) ## Базовый размер маленькой ячейки
 
 var all_chunks: Array[Chunk] = []
 var starter_chunk: Chunk = null ## Ссылка на стартовую комнату муравейника
@@ -24,51 +17,33 @@ func _ready() -> void:
 	generate_underground()
 
 
-## Базовая генерация начальной структуры муравейника
+## Генерация сплошного массива чанков с огромным стартовым центром
 func generate_underground() -> void:
-	# 1. Стартовый чанк (всегда UNLOCKED и строго под поверхностью земли)
-	var start_pos := Vector2(-starter_chunk_size.x / 2.0, ground_y_level)
-	starter_chunk = _spawn_chunk(start_pos, starter_chunk_size, Chunk.Status.UNLOCKED)
+	var start_x: float = -(grid_columns * cell_size.x) / 2.0
+	
+	# Определяем координаты для большого стартового чанка (размер 2x2 ячейки)
+	var starter_col: int = int(grid_columns / 2.0) - 1
+	var starter_row: int = 0
+	
+	# 1. Спавним огромный стартовый чанк
+	var starter_pos := Vector2(start_x + starter_col * cell_size.x, ground_y_level)
+	var starter_size := cell_size * 2.0 # В 2 раза больше по ширине и высоте (512x512)
+	starter_chunk = _spawn_chunk(starter_pos, starter_size, Chunk.Status.UNLOCKED)
 	starter_chunk.name = "StarterChunk"
 
-	# 2. Создаем ветви/соседей от стартового чанка
-	# Слева
-	_attach_chunk_to(starter_chunk, Vector2.LEFT, chunk_shapes.pick_random())
-	# Справа
-	_attach_chunk_to(starter_chunk, Vector2.RIGHT, chunk_shapes.pick_random())
-	# Вглубь (вниз)
-	var bottom_chunk := _attach_chunk_to(starter_chunk, Vector2.DOWN, chunk_shapes.pick_random())
+	# 2. Генерируем остальную сетку вокруг него
+	for row in range(grid_rows):
+		for col in range(grid_columns):
+			# Пропускаем генерацию маленьких ячеек там, где уже стоит большой стартовый чанк
+			if row >= starter_row and row < starter_row + 2:
+				if col >= starter_col and col < starter_col + 2:
+					continue
+			
+			var pos := Vector2(start_x + col * cell_size.x, ground_y_level + row * cell_size.y)
+			_spawn_chunk(pos, cell_size, Chunk.Status.LOCKED)
 
-	# 3. Делаем второй ярус вглубь от нижнего чанка
-	if bottom_chunk:
-		_attach_chunk_to(bottom_chunk, Vector2.LEFT, chunk_shapes.pick_random())
-		_attach_chunk_to(bottom_chunk, Vector2.RIGHT, chunk_shapes.pick_random())
-		_attach_chunk_to(bottom_chunk, Vector2.DOWN, chunk_shapes.pick_random())
-
-	# 4. Обновляем граф смежности (кто с кем граничит)
+	# 3. Обновляем граф смежности (он автоматически свяжет большой чанк со всеми мелкими соседями)
 	_build_adjacency_graph()
-
-
-## Пристыковывает новый чанк к существующему в заданную сторону (LEFT, RIGHT, DOWN)
-func _attach_chunk_to(parent_chunk: Chunk, direction: Vector2, new_size: Vector2) -> Chunk:
-	var new_pos := Vector2.ZERO
-
-	if direction == Vector2.LEFT:
-		new_pos.x = parent_chunk.position.x - new_size.x
-		new_pos.y = parent_chunk.position.y
-	elif direction == Vector2.RIGHT:
-		new_pos.x = parent_chunk.position.x + parent_chunk.chunk_size.x
-		new_pos.y = parent_chunk.position.y
-	elif direction == Vector2.DOWN:
-		new_pos.x = parent_chunk.position.x
-		new_pos.y = parent_chunk.position.y + parent_chunk.chunk_size.y
-
-	# Проверяем, чтобы чанк не уходил выше уровня земли
-	if new_pos.y < ground_y_level:
-		new_pos.y = ground_y_level
-
-	var new_chunk := _spawn_chunk(new_pos, new_size, Chunk.Status.LOCKED)
-	return new_chunk
 
 
 func _spawn_chunk(pos: Vector2, size: Vector2, initial_status: Chunk.Status) -> Chunk:
@@ -90,7 +65,7 @@ func _build_adjacency_graph() -> void:
 			var c2: Chunk = all_chunks[j]
 			var rect2 := Rect2(c2.position, c2.chunk_size)
 
-			# Если прямоугольники соприкасаются (с небольшим запасом погрешности 2px)
+			# Если прямоугольники соприкасаются (с запасом погрешности 2px для стыков сетки)
 			if rect1.grow(2.0).intersects(rect2):
 				if not c1.neighbors.has(c2):
 					c1.neighbors.append(c2)
@@ -99,7 +74,6 @@ func _build_adjacency_graph() -> void:
 
 
 ## Проверка: разрешено ли строить здание в точке мира?
-## Точка должна попадать в чанк со статусом UNLOCKED
 func is_position_buildable(world_pos: Vector2) -> bool:
 	for chunk in all_chunks:
 		var rect := Rect2(chunk.position, chunk.chunk_size)
