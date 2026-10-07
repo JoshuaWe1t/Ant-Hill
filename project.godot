@@ -11,6 +11,7 @@ config_version=5
 [application]
 
 config/name="Ant Hill"
+run/main_scene="uid://b6fhm6ekxat7k"
 config/features=PackedStringArray("4.5", "GL Compatibility")
 config/icon="res://icon.svg"
 
@@ -20,6 +21,7 @@ ResourceManager="*res://core/autoload/ResourceManager.gd"
 EventBus="*res://core/autoload/EventBus.gd"
 AddResources="*res://debug/cheats/add_resources.gd"
 ColonyManager="*res://core/autoload/ColonyManager.gd"
+VictoryManager="*res://core/autoload/VictoryManager.gd"
 
 [display]
 
