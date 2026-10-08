@@ -1,6 +1,6 @@
 extends CanvasLayer
 
-@export var main_menu_path: String = "res://MainMenu.tscn"
+@export var main_menu_path: String = "res://scenes/menus/main_menu/main_menu.tscn"
 
 @onready var bg: ColorRect = $DimBackground
 @onready var pause_panel: Control = $PausePanel
