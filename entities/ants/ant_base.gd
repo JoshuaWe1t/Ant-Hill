@@ -34,9 +34,9 @@ enum State {
 
 # --- Спрайты под каждую специализацию ---
 @export_group("Visuals")
-@export var worker_texture: Texture2D
-@export var soldier_texture: Texture2D
-@export var babysitter_texture: Texture2D
+@export var worker_texture: Texture2D = load("res://assets/textures/ants1.png")
+@export var soldier_texture: Texture2D = load("res://assets/textures/ants3.png")
+@export var babysitter_texture: Texture2D = load("res://assets/textures/ants2.png")
 
 var current_health: float = 12.0
 var current_state: State = State.IDLE
@@ -254,7 +254,7 @@ func take_damage(amount: float) -> void:
 		return
 	current_health = maxf(0.0, current_health - amount)
 	if current_health <= 0.0:
-		_die("damage")
+		_die("Голод")
 
 
 func _die(_reason: String) -> void:
@@ -263,6 +263,7 @@ func _die(_reason: String) -> void:
 		current_workplace.unassign_worker(self)
 	died.emit(self)
 	print("Муравей погиб. Причина: ", _reason)
+	EventBus.show_notification.emit("Муравей погиб.\nПричина: %s" % _reason, Color(0.0, 0.0, 0.737, 1.0))
 	queue_free()
 
 
@@ -272,33 +273,33 @@ func _flip_sprite(dir_x: float) -> void:
 
 
 # СТАРЫЙ КОММЕНТАРИЙ С ТЕКСТУРАМИ СОХРАНЕН ПОЛНОСТЬЮ:
-#func _apply_visuals() -> void:
-	#if not sprite_2d:
-		#return
-#
-	#match ant_type:
-		#Cocoon.AntType.WORKER:
-			#if worker_texture:
-				#sprite_2d.texture = worker_texture
-		#Cocoon.AntType.SOLDIER:
-			#if soldier_texture:
-				#sprite_2d.texture = soldier_texture
-		#Cocoon.AntType.BABYSITTER:
-			#if babysitter_texture:
-				#sprite_2d.texture = babysitter_texture
-
-
 func _apply_visuals() -> void:
 	if not sprite_2d:
 		return
 
 	match ant_type:
 		Cocoon.AntType.WORKER:
-			sprite_2d.modulate = Color(0.149, 0.569, 0.059, 1.0)
+			if worker_texture:
+				sprite_2d.texture = worker_texture
 		Cocoon.AntType.SOLDIER:
-			sprite_2d.modulate = Color(0.9, 0.2, 0.2)
+			if soldier_texture:
+				sprite_2d.texture = soldier_texture
 		Cocoon.AntType.BABYSITTER:
-			sprite_2d.modulate = Color(0.2, 0.7, 0.9)
+			if babysitter_texture:
+				sprite_2d.texture = babysitter_texture
+
+
+#func _apply_visuals() -> void:
+	#if not sprite_2d:
+		#return
+#
+	#match ant_type:
+		#Cocoon.AntType.WORKER:
+			#sprite_2d.modulate = Color(0.149, 0.569, 0.059, 1.0)
+		#Cocoon.AntType.SOLDIER:
+			#sprite_2d.modulate = Color(0.9, 0.2, 0.2)
+		#Cocoon.AntType.BABYSITTER:
+			#sprite_2d.modulate = Color(0.2, 0.7, 0.9)
 
 
 ## Назначение домашнего чанка

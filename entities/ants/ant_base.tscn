@@ -1,7 +1,10 @@
-[gd_scene load_steps=4 format=3 uid="uid://d20t83o8o7rhn"]
+[gd_scene load_steps=7 format=3 uid="uid://d20t83o8o7rhn"]
 
 [ext_resource type="Texture2D" uid="uid://dnhnf74yu2krq" path="res://icon.svg" id="1_34iq6"]
 [ext_resource type="Script" uid="uid://c71ov57vbj6wk" path="res://entities/ants/ant_base.gd" id="1_f4j16"]
+[ext_resource type="Texture2D" uid="uid://bpjlo1nrtwbqt" path="res://assets/textures/ants1.png" id="2_u8s2c"]
+[ext_resource type="Texture2D" uid="uid://miowx5j6pr8x" path="res://assets/textures/ants3.png" id="3_1dhfp"]
+[ext_resource type="Texture2D" uid="uid://dkarowlkjq188" path="res://assets/textures/ants2.png" id="4_ajkw5"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_f4j16"]
 radius = 18.0
@@ -10,9 +13,9 @@ height = 54.0
 [node name="AntBase" type="CharacterBody2D"]
 collision_layer = 2
 script = ExtResource("1_f4j16")
-worker_texture = ExtResource("1_34iq6")
-soldier_texture = ExtResource("1_34iq6")
-babysitter_texture = ExtResource("1_34iq6")
+worker_texture = ExtResource("2_u8s2c")
+soldier_texture = ExtResource("3_1dhfp")
+babysitter_texture = ExtResource("4_ajkw5")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 scale = Vector2(0.45, 0.45)
