@@ -1,8 +1,8 @@
 [gd_scene load_steps=4 format=3 uid="uid://crs1po5ovofv0"]
 
 [ext_resource type="Script" uid="uid://chnh3dr5u04lg" path="res://entities/cocoon/cocoon.gd" id="1_8hnb1"]
-[ext_resource type="Texture2D" uid="uid://dnhnf74yu2krq" path="res://icon.svg" id="1_qdnsp"]
 [ext_resource type="PackedScene" uid="uid://d20t83o8o7rhn" path="res://entities/ants/ant_base.tscn" id="2_j7vfo"]
+[ext_resource type="Texture2D" uid="uid://dm3uay60kbxs6" path="res://assets/textures/ants5.png" id="3_j7vfo"]
 
 [node name="Cocoon" type="Area2D"]
 z_index = 20
@@ -11,7 +11,7 @@ ant_scene = ExtResource("2_j7vfo")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 scale = Vector2(0.3, 0.3)
-texture = ExtResource("1_qdnsp")
+texture = ExtResource("3_j7vfo")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 
