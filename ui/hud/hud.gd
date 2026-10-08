@@ -10,6 +10,11 @@ extends CanvasLayer
 @onready var silk_label: Label = $UIControl/ResourcesPanel/MarginContainer/HBoxContainer/SilkBox/Value
 @onready var starvation_banner: PanelContainer = $StarvationBanner
 @onready var banner_label: Label = $StarvationBanner/BannerLabel
+# Ссылки на элементы новой панели
+@onready var workers_label: Label = $UIControl/ColonyPanel/MarginContainer/HBoxContainer/WorkersBox/Value
+@onready var soldiers_label: Label = $UIControl/ColonyPanel/MarginContainer/HBoxContainer/SoldiersBox/Value
+@onready var babysitters_label: Label = $UIControl/ColonyPanel/MarginContainer/HBoxContainer/BabysittersBox/Value
+@onready var storage_label: Label = $UIControl/ColonyPanel/MarginContainer/HBoxContainer/StorageBox/Value
 
 # Блок миссии и таймера (Левый верхний угол по GDD)
 @onready var timer_label: Label = $UIControl/MissionContainer/TimerLabel
@@ -22,6 +27,7 @@ var _resource_labels: Dictionary = {}
 
 # Счетчик для смещения текста, чтобы сообщения не слипались в одну кучу
 var _notification_count: int = 0
+var current_mission_text: String = ""
 
 func _ready() -> void:
 	if starvation_banner:
@@ -47,8 +53,11 @@ func _ready() -> void:
 	# Подписываемся на события менеджера ресурсов
 	ResourceManager.resource_changed.connect(_on_resource_changed)
 	ResourceManager.resources_updated.connect(_on_resources_updated)
+	ResourceManager.storage_limit_updated.connect(_on_storage_limit_updated) # Новая строка
 	
 	# Первичная инициализация текущими значениями
+	_on_resources_updated(ResourceManager.resources)
+	_on_storage_limit_updated(ResourceManager.get_total_resources(), ResourceManager.get_max_capacity()) # Новая строкаиями
 	_on_resources_updated(ResourceManager.resources)
 	
 	if is_instance_valid(VictoryManager):
@@ -61,8 +70,8 @@ func _ready() -> void:
 		
 	if is_instance_valid(ColonyManager):
 		ColonyManager.population_updated.connect(_on_population_changed)
-		
-	_update_goal_text()
+		# Используем геттер вместо прямого обращения к .size()
+		_update_colony_panel(ColonyManager.get_current_population(), ColonyManager.get_max_population())
 
 
 ## Точечное обновление при изменении конкретного ресурса
@@ -131,31 +140,16 @@ func _on_queen_fed() -> void:
 
 
 ## Первичное отображение текущей цели при запуске уровня
-func _update_goal_text() -> void:
+func _update_goal_text(msg: String = "") -> void:
 	if not is_instance_valid(VictoryManager):
 		return
+	
+	# Если передано новое сообщение из сигнала, обновляем сохраненную строку
+	if msg != "":
+		current_mission_text = msg
 		
-	match VictoryManager.active_condition:
-		VictoryManager.VictoryConditionType.TOTAL_ANTS:
-			var current: int = ColonyManager.get_current_population()
-			var target: int = VictoryManager.target_total_ants
-			set_quest_text("Цель: Популяция (%d / %d)" % [current, target])
-			
-		VictoryManager.VictoryConditionType.SPECIFIC_ANT_TYPE:
-			# Считаем юнитов конкретного типа
-			var matching: int = 0
-			for ant in ColonyManager.alive_ants:
-				if is_instance_valid(ant) and ant.ant_type == VictoryManager.target_ant_type:
-					matching += 1
-			var target: int = VictoryManager.target_ant_type_count
-			set_quest_text("Цель: Элита (%d / %d)" % [matching, target])
-			
-		VictoryManager.VictoryConditionType.OPENED_CHUNKS_AREA:
-			# Базовая заглушка, пока не подключим сигнал раскопки чанков
-			set_quest_text("Цель: Открыть карту (В процессе...)")
-			
-		VictoryManager.VictoryConditionType.COLLECT_RESOURCES:
-			set_quest_text("Цель: Собрать спец-ресурсы")
+	# Выводим текущее задание на экран
+	set_quest_text(current_mission_text)
 
 
 ## Срабатывает при выполнении условия победы
@@ -168,7 +162,9 @@ func _on_victory_achieved(message: String) -> void:
 
 
 ## Срабатывает при изменении числа муравьев или лимита жилья
-func _on_population_changed(_current: int, _max: int) -> void:
+func _on_population_changed(current: int, max_pop: int) -> void:
+	_update_colony_panel(current, max_pop)
+	
 	if is_instance_valid(VictoryManager) and not VictoryManager.is_game_over:
 		_update_goal_text()
 
@@ -182,10 +178,10 @@ func _on_defeat_achieved(message: String) -> void:
 
 
 ## Создает всплывающий текст справа по центру экрана
-func _on_show_notification(message: String) -> void:
+func _on_show_notification(message: String, color: Color = Color(0.6, 1.0, 0.6)) -> void:
 	var label := Label.new()
 	label.text = message
-	label.add_theme_color_override("font_color", Color(0.6, 1.0, 0.6)) # Приятный зеленый цвет
+	label.add_theme_color_override("font_color", color) # Приятный зеленый цвет
 	label.add_theme_font_size_override("font_size", 18)
 	
 	# Добавляем на слой UIControl, чтобы текст был поверх всего
@@ -214,3 +210,36 @@ func _on_show_notification(message: String) -> void:
 		if _notification_count < 0:
 			_notification_count = 0
 	)
+
+## Динамический пересчет и обновление значений панели колонии
+func _update_colony_panel(current: int, max_pop: int) -> void:
+	if not is_instance_valid(ColonyManager):
+		return
+
+	var workers_count: int = 0
+	var soldiers_count: int = 0
+	var babysitters_count: int = 0
+
+	# Подсчет муравьев по типам
+	for ant in ColonyManager.alive_ants:
+		if is_instance_valid(ant):
+			match ant.ant_type:
+				Cocoon.AntType.WORKER:
+					workers_count += 1
+				Cocoon.AntType.SOLDIER:
+					soldiers_count += 1
+				Cocoon.AntType.BABYSITTER:
+					babysitters_count += 1
+
+	if workers_label:
+		workers_label.text = str(workers_count)
+	if soldiers_label:
+		soldiers_label.text = str(soldiers_count)
+	if babysitters_label:
+		babysitters_label.text = str(babysitters_count)
+
+
+## Срабатывает при изменении суммарного объема ресурсов или постройке складов
+func _on_storage_limit_updated(current_total: int, max_capacity: int) -> void:
+	if storage_label:
+		storage_label.text = "%d/%d" % [current_total, max_capacity]

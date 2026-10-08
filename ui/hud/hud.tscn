@@ -1,7 +1,17 @@
-[gd_scene load_steps=3 format=3 uid="uid://bvqqyi2svol2k"]
+[gd_scene load_steps=13 format=3 uid="uid://bvqqyi2svol2k"]
 
 [ext_resource type="Script" uid="uid://18v8l0tyo7mv" path="res://ui/hud/hud.gd" id="1_4d6w6"]
-[ext_resource type="Texture2D" uid="uid://dnhnf74yu2krq" path="res://icon.svg" id="1_xmswo"]
+[ext_resource type="Texture2D" uid="uid://bcrud33f3hk5d" path="res://assets/textures/icons-resources1.png" id="2_aixkq"]
+[ext_resource type="Texture2D" uid="uid://dnrsc3rnvspv8" path="res://assets/textures/icons-resources2.png" id="3_cxhb7"]
+[ext_resource type="Texture2D" uid="uid://biq4p471vq03a" path="res://assets/textures/icons-resources3.png" id="4_5uuaq"]
+[ext_resource type="Texture2D" uid="uid://dqu3xpe13ur46" path="res://assets/textures/icons-resources4.png" id="5_p3vm3"]
+[ext_resource type="Texture2D" uid="uid://d4e7rcryn8duc" path="res://assets/textures/icons-resources5.png" id="6_gv4gi"]
+[ext_resource type="Texture2D" uid="uid://cqv1tuy5wmqdr" path="res://assets/textures/icons-resources6.png" id="7_5mn0o"]
+[ext_resource type="Texture2D" uid="uid://bqm41j00jwsre" path="res://assets/textures/icons-resources7.png" id="8_3mxrk"]
+[ext_resource type="Texture2D" uid="uid://d0ws8ly530atj" path="res://assets/textures/icons-ants-res1.png" id="9_p3vm3"]
+[ext_resource type="Texture2D" uid="uid://b406c70dr2xhw" path="res://assets/textures/icons-ants-res2.png" id="10_gv4gi"]
+[ext_resource type="Texture2D" uid="uid://ctlwtprach5ag" path="res://assets/textures/icons-ants-res3.png" id="11_5mn0o"]
+[ext_resource type="Texture2D" uid="uid://ct712rg61mp4a" path="res://assets/textures/icons-ants-res4.png" id="12_3mxrk"]
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_4d6w6")
@@ -17,8 +27,10 @@ mouse_filter = 2
 
 [node name="MissionContainer" type="VBoxContainer" parent="UIControl"]
 layout_mode = 1
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = 10.0
+offset_top = 8.0
+offset_right = 98.0
+offset_bottom = 58.0
 mouse_filter = 2
 
 [node name="TimerLabel" type="Label" parent="UIControl/MissionContainer"]
@@ -53,7 +65,7 @@ mouse_filter = 2
 
 [node name="Icon" type="TextureRect" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/WaterBox"]
 layout_mode = 2
-texture = ExtResource("1_xmswo")
+texture = ExtResource("2_aixkq")
 expand_mode = 2
 
 [node name="Value" type="Label" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/WaterBox"]
@@ -66,7 +78,7 @@ mouse_filter = 2
 
 [node name="Icon" type="TextureRect" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/ProteinBox"]
 layout_mode = 2
-texture = ExtResource("1_xmswo")
+texture = ExtResource("3_cxhb7")
 expand_mode = 2
 
 [node name="Value" type="Label" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/ProteinBox"]
@@ -79,7 +91,7 @@ mouse_filter = 2
 
 [node name="Icon" type="TextureRect" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/PhytomassBox"]
 layout_mode = 2
-texture = ExtResource("1_xmswo")
+texture = ExtResource("4_5uuaq")
 expand_mode = 2
 
 [node name="Value" type="Label" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/PhytomassBox"]
@@ -92,7 +104,7 @@ mouse_filter = 2
 
 [node name="Icon" type="TextureRect" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/WoodBox"]
 layout_mode = 2
-texture = ExtResource("1_xmswo")
+texture = ExtResource("5_p3vm3")
 expand_mode = 2
 
 [node name="Value" type="Label" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/WoodBox"]
@@ -105,7 +117,7 @@ mouse_filter = 2
 
 [node name="Icon" type="TextureRect" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/ClayBox"]
 layout_mode = 2
-texture = ExtResource("1_xmswo")
+texture = ExtResource("6_gv4gi")
 expand_mode = 2
 
 [node name="Value" type="Label" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/ClayBox"]
@@ -118,7 +130,7 @@ mouse_filter = 2
 
 [node name="Icon" type="TextureRect" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/ResinBox"]
 layout_mode = 2
-texture = ExtResource("1_xmswo")
+texture = ExtResource("7_5mn0o")
 expand_mode = 2
 
 [node name="Value" type="Label" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/ResinBox"]
@@ -131,14 +143,86 @@ mouse_filter = 2
 
 [node name="Icon" type="TextureRect" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/SilkBox"]
 layout_mode = 2
-texture = ExtResource("1_xmswo")
+texture = ExtResource("8_3mxrk")
 expand_mode = 2
 
 [node name="Value" type="Label" parent="UIControl/ResourcesPanel/MarginContainer/HBoxContainer/SilkBox"]
 layout_mode = 2
 text = "1000"
 
+[node name="ColonyPanel" type="HBoxContainer" parent="UIControl"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -421.0
+offset_top = 48.0
+offset_bottom = 88.0
+grow_horizontal = 0
+mouse_filter = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="UIControl/ColonyPanel"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UIControl/ColonyPanel/MarginContainer"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="WorkersBox" type="HBoxContainer" parent="UIControl/ColonyPanel/MarginContainer/HBoxContainer"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="UIControl/ColonyPanel/MarginContainer/HBoxContainer/WorkersBox"]
+layout_mode = 2
+texture = ExtResource("9_p3vm3")
+expand_mode = 2
+
+[node name="Value" type="Label" parent="UIControl/ColonyPanel/MarginContainer/HBoxContainer/WorkersBox"]
+layout_mode = 2
+text = "1000"
+
+[node name="SoldiersBox" type="HBoxContainer" parent="UIControl/ColonyPanel/MarginContainer/HBoxContainer"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="UIControl/ColonyPanel/MarginContainer/HBoxContainer/SoldiersBox"]
+layout_mode = 2
+texture = ExtResource("10_gv4gi")
+expand_mode = 2
+
+[node name="Value" type="Label" parent="UIControl/ColonyPanel/MarginContainer/HBoxContainer/SoldiersBox"]
+layout_mode = 2
+text = "1000"
+
+[node name="BabysittersBox" type="HBoxContainer" parent="UIControl/ColonyPanel/MarginContainer/HBoxContainer"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="UIControl/ColonyPanel/MarginContainer/HBoxContainer/BabysittersBox"]
+layout_mode = 2
+texture = ExtResource("11_5mn0o")
+expand_mode = 2
+
+[node name="Value" type="Label" parent="UIControl/ColonyPanel/MarginContainer/HBoxContainer/BabysittersBox"]
+layout_mode = 2
+text = "1000"
+
+[node name="StorageBox" type="HBoxContainer" parent="UIControl/ColonyPanel/MarginContainer/HBoxContainer"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="UIControl/ColonyPanel/MarginContainer/HBoxContainer/StorageBox"]
+layout_mode = 2
+texture = ExtResource("12_3mxrk")
+expand_mode = 2
+
+[node name="Value" type="Label" parent="UIControl/ColonyPanel/MarginContainer/HBoxContainer/StorageBox"]
+layout_mode = 2
+text = "1000"
+
 [node name="StarvationBanner" type="PanelContainer" parent="."]
+visible = false
 modulate = Color(0.003921569, 0.003921569, 0.003921569, 0.34509805)
 anchors_preset = 6
 anchor_left = 1.0
