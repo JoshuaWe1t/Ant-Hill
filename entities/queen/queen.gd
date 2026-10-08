@@ -322,7 +322,8 @@ func _on_upkeep_tick() -> void:
 		print("Королева голодает! Не хватило ресурсов: %d. Получен урон." % missing_amount)
 		take_damage(float(missing_amount))
 		if is_instance_valid(EventBus):
-			EventBus.queen_starving.emit(missing_amount)
+			#EventBus.queen_starving.emit(missing_amount)
+			EventBus.show_notification.emit("КОРОЛЕВА ГОЛОДАЕТ!\nДЕФИЦИТ РЕСУРСОВ: %d" % missing_amount, Color(0.829, 0.002, 0.001, 1.0))
 	else:
 		# Сытость: если здоровье не полное, восстанавливаем 50% от потерянного HP
 		var lost_health: float = max_health - current_health

@@ -1,8 +1,8 @@
 [gd_scene load_steps=5 format=3 uid="uid://deidj76shhc2m"]
 
-[ext_resource type="Texture2D" uid="uid://dnhnf74yu2krq" path="res://icon.svg" id="1_7lr04"]
 [ext_resource type="Script" uid="uid://bt7a8qtvsrgwk" path="res://entities/queen/queen.gd" id="1_mjrnf"]
 [ext_resource type="PackedScene" uid="uid://crs1po5ovofv0" path="res://entities/cocoon/cocoon.tscn" id="2_h1hci"]
+[ext_resource type="Texture2D" uid="uid://bgf4ltbu0fpet" path="res://assets/textures/ants4.png" id="3_h1hci"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mjrnf"]
 size = Vector2(116, 115)
@@ -22,7 +22,7 @@ offset_right = 59.0
 offset_bottom = 70.0
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("1_7lr04")
+texture = ExtResource("3_h1hci")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_mjrnf")
