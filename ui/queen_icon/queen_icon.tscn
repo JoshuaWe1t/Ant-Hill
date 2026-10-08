@@ -1,14 +1,17 @@
-[gd_scene load_steps=3 format=3 uid="uid://baovp2abgxyll"]
+[gd_scene load_steps=6 format=3 uid="uid://baovp2abgxyll"]
 
 [ext_resource type="Script" uid="uid://cikf0eyl75qws" path="res://ui/queen_icon/queen_icon.gd" id="1_r2iqf"]
-[ext_resource type="Texture2D" uid="uid://dnhnf74yu2krq" path="res://icon.svg" id="2_psufd"]
+[ext_resource type="Texture2D" uid="uid://cvhrs50m0bidt" path="res://assets/textures/icon-queen1.png" id="2_awaia"]
+[ext_resource type="Texture2D" uid="uid://lpwq4fbxwg80" path="res://assets/textures/icon-queen2.png" id="3_5gvq2"]
+[ext_resource type="Texture2D" uid="uid://cvvvkbaj0adaf" path="res://assets/textures/icon-queen3.png" id="4_ksve8"]
+[ext_resource type="Texture2D" uid="uid://5vsvv8eoackg" path="res://assets/textures/icon-queen4.png" id="5_et3nx"]
 
 [node name="QueenIcon" type="CanvasLayer"]
 script = ExtResource("1_r2iqf")
-sprite_healthy = ExtResource("2_psufd")
-sprite_damaged = ExtResource("2_psufd")
-sprite_critical = ExtResource("2_psufd")
-sprite_dead = ExtResource("2_psufd")
+sprite_healthy = ExtResource("2_awaia")
+sprite_damaged = ExtResource("3_5gvq2")
+sprite_critical = ExtResource("4_ksve8")
+sprite_dead = ExtResource("5_et3nx")
 
 [node name="TextureButton" type="TextureButton" parent="."]
 offset_left = 10.0

@@ -1,10 +1,10 @@
 extends CanvasLayer
 
 @export_group("Queen Sprites")
-@export var sprite_healthy: Texture2D   ## Здоровье == 100
-@export var sprite_damaged: Texture2D   ## Здоровье от 41 до 99
-@export var sprite_critical: Texture2D  ## Здоровье от 1 до 40
-@export var sprite_dead: Texture2D      ## Здоровье == 0
+@export var sprite_healthy: Texture2D = load("res://assets/textures/icon-queen1.png")   ## Здоровье == 100
+@export var sprite_damaged: Texture2D = load("res://assets/textures/icon-queen2.png")  ## Здоровье от 41 до 99
+@export var sprite_critical: Texture2D = load("res://assets/textures/icon-queen3.png") ## Здоровье от 1 до 40
+@export var sprite_dead: Texture2D = load("res://assets/textures/icon-queen4.png")     ## Здоровье == 0
 
 @onready var button: TextureButton = $TextureButton
 
