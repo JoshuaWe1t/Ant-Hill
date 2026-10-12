@@ -10,8 +10,8 @@ static var DATA: Dictionary = {
 			ResourceManager.ResourceType.CLAY: 2
 		},
 		"scene": preload("res://entities/buildings/shelter/shelter.tscn"),
-		"texture": preload("res://assets/textures/shelter.png"),
-		"description": "DESCRIPTION OF BUILDING",
+		"texture": preload("res://assets/textures/building1.png"),
+		"description": "Grants new live places",
 		"workers_needed": 2,
 		"build_duration": 30
 	},
@@ -25,8 +25,8 @@ static var DATA: Dictionary = {
 			ResourceManager.ResourceType.RESIN: 5
 		},
 		"scene": preload("res://entities/buildings/stockpile/stockpile.tscn"),
-		"texture": preload("res://assets/textures/stockpie.png"),
-		"description": "DESCRIPTION OF BUILDING",
+		"texture": preload("res://assets/textures/building2.png"),
+		"description": "Grants extra vault volume",
 		"workers_needed": 2,
 		"build_duration": 35
 	},
@@ -40,8 +40,8 @@ static var DATA: Dictionary = {
 			ResourceManager.ResourceType.CLAY: 5
 		},
 		"scene": preload("res://entities/buildings/ants_kindergarten/ants_kindergarten.tscn"),
-		"texture": preload("res://assets/textures/babies-place.png"),
-		"description": "DESCRIPTION OF BUILDING",
+		"texture": preload("res://assets/textures/building3.png"),
+		"description": "Improve quality of cocoon",
 		"workers_needed": 2,
 		"build_duration": 45
 	},
@@ -58,8 +58,8 @@ static var DATA: Dictionary = {
 			ResourceManager.ResourceType.RESIN: 2
 		},
 		"scene": preload("res://entities/buildings/aphid_farm/aphid_farm.tscn"),
-		"texture": preload("res://assets/textures/farm.png"),
-		"description": "DESCRIPTION OF BUILDING",
+		"texture": preload("res://assets/textures/building4.png"),
+		"description": "Every few seconds produces resources (water, protein, phytomass and silk)",
 		"workers_needed": 2,
 		"build_duration": 50
 	}
