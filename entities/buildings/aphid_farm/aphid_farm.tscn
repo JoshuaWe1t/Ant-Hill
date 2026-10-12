@@ -1,15 +1,22 @@
-[gd_scene load_steps=3 format=3 uid="uid://pdwm03ni713q"]
+[gd_scene load_steps=4 format=3 uid="uid://pdwm03ni713q"]
 
 [ext_resource type="PackedScene" uid="uid://cdoeypllfriql" path="res://entities/buildings/building_base/building_base.tscn" id="1_0gl3p"]
 [ext_resource type="Script" uid="uid://ca6abk77panq2" path="res://entities/buildings/aphid_farm/aphid_farm.gd" id="2_8nkce"]
+[ext_resource type="Texture2D" uid="uid://cx0s46y61kuad" path="res://assets/textures/farm.png" id="3_w55pw"]
 
 [node name="AphidFarm" instance=ExtResource("1_0gl3p")]
 script = ExtResource("2_8nkce")
 production_interval = 15.0
 max_worker_capacity = 5
 production_yield = {
-0: 2,
-1: 2,
-2: 5,
-6: 3
+0: 20,
+1: 20,
+2: 20,
+6: 5
 }
+
+[node name="Sprite2D2" type="Sprite2D" parent="." index="0"]
+texture = ExtResource("3_w55pw")
+
+[node name="Sprite2D" parent="." index="5"]
+texture = ExtResource("3_w55pw")

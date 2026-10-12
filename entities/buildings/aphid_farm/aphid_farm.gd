@@ -6,10 +6,10 @@ extends BuildingBase
 
 # Производство ресурсов за 1 такт по GDD (Раздел 4.2)
 @export var production_yield: Dictionary = {
-	ResourceManager.ResourceType.WATER: 2,
-	ResourceManager.ResourceType.PROTEIN: 2,
-	ResourceManager.ResourceType.PHYTOMASS: 5,
-	ResourceManager.ResourceType.SILK: 3
+	ResourceManager.ResourceType.WATER: 20,
+	ResourceManager.ResourceType.PROTEIN: 20,
+	ResourceManager.ResourceType.PHYTOMASS: 20,
+	ResourceManager.ResourceType.SILK: 5
 }
 
 var production_timer: Timer = null
@@ -38,3 +38,23 @@ func _on_production_tick() -> void:
 	if is_instance_valid(ResourceManager):
 		ResourceManager.add_resources(production_yield)
 		print("Ферма тли произвела партию ресурсов: ", production_yield)
+	# Начисление и вывод уведомлений в EventBus
+	if is_instance_valid(ResourceManager) and not production_yield.is_empty():
+		ResourceManager.add_resources(production_yield)
+		
+		var res_names_ru = {
+			ResourceManager.ResourceType.WATER: "water",
+			ResourceManager.ResourceType.PROTEIN: "proteins",
+			ResourceManager.ResourceType.PHYTOMASS: "phytomasses",
+			ResourceManager.ResourceType.WOOD: "woods",
+			ResourceManager.ResourceType.CLAY: "clays",
+			ResourceManager.ResourceType.RESIN: "resins",
+			ResourceManager.ResourceType.SILK: "silks"
+		}
+		
+		if is_instance_valid(EventBus):
+			for res_type in production_yield:
+				var amount = production_yield[res_type]
+				var res_name = res_names_ru.get(res_type, "ресурсов")
+				var msg = "Added %d %s" % [amount, res_name]
+				EventBus.show_notification.emit(msg, Color(0.2, 1.0, 0.2))
