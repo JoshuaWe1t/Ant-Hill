@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://br8s2d08h4381"]
 
 [ext_resource type="Script" uid="uid://bie1vqkg5ryi7" path="res://entities/buildings/nest/nest.gd" id="1_tl1n7"]
-[ext_resource type="Texture2D" uid="uid://dnhnf74yu2krq" path="res://icon.svg" id="2_rs3wk"]
+[ext_resource type="Texture2D" uid="uid://b82j4q047g417" path="res://assets/textures/nest.png" id="2_tl1n7"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_c3xq3"]
 size = Vector2(200, 200)
@@ -14,7 +14,7 @@ script = ExtResource("1_tl1n7")
 [node name="Sprite2D" type="Sprite2D" parent="."]
 position = Vector2(-1.5000038, 1.9073486e-06)
 scale = Vector2(1.5703124, 1.59375)
-texture = ExtResource("2_rs3wk")
+texture = ExtResource("2_tl1n7")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_c3xq3")
@@ -26,6 +26,7 @@ width = 2.0
 default_color = Color(1, 1, 0, 1)
 
 [node name="InfoLabel" type="Label" parent="."]
+visible = false
 offset_left = -90.0
 offset_top = -90.0
 offset_right = -89.0
