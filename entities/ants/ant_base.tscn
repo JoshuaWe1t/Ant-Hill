@@ -32,5 +32,6 @@ autostart = true
 one_shot = true
 
 [node name="StateLabel" type="Label" parent="."]
+visible = false
 offset_right = 40.0
 offset_bottom = 23.0

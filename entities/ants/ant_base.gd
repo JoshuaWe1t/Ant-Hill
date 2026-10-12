@@ -25,7 +25,7 @@ enum State {
 @export var water_upkeep: int = 1
 @export var protein_upkeep: int = 1
 @export var phytomass_upkeep: int = 1
-@export var hunger_interval: float = 15.0 ## Интервал списания ресурсов на поддержание жизни
+@export var hunger_interval: float = 60.0 ## Интервал списания ресурсов на поддержание жизни
 
 # --- Система старения (Опциональная заготовка) ---
 @export_group("Aging System")
@@ -254,7 +254,7 @@ func take_damage(amount: float) -> void:
 		return
 	current_health = maxf(0.0, current_health - amount)
 	if current_health <= 0.0:
-		_die("Голод")
+		_die("Hunger")
 
 
 func _die(_reason: String) -> void:
@@ -263,7 +263,7 @@ func _die(_reason: String) -> void:
 		current_workplace.unassign_worker(self)
 	died.emit(self)
 	print("Муравей погиб. Причина: ", _reason)
-	EventBus.show_notification.emit("Муравей погиб.\nПричина: %s" % _reason, Color(0.0, 0.0, 0.737, 1.0))
+	EventBus.show_notification.emit("Ant died.\nReason: %s" % _reason, Color(0.0, 0.0, 0.737, 1.0))
 	queue_free()
 
 
@@ -289,19 +289,6 @@ func _apply_visuals() -> void:
 				sprite_2d.texture = babysitter_texture
 
 
-#func _apply_visuals() -> void:
-	#if not sprite_2d:
-		#return
-#
-	#match ant_type:
-		#Cocoon.AntType.WORKER:
-			#sprite_2d.modulate = Color(0.149, 0.569, 0.059, 1.0)
-		#Cocoon.AntType.SOLDIER:
-			#sprite_2d.modulate = Color(0.9, 0.2, 0.2)
-		#Cocoon.AntType.BABYSITTER:
-			#sprite_2d.modulate = Color(0.2, 0.7, 0.9)
-
-
 ## Назначение домашнего чанка
 func assign_chunk(chunk: Chunk) -> void:
 	current_chunk = chunk
@@ -320,7 +307,7 @@ func _get_random_point_in_chunk() -> Vector2:
 			return Vector2(randf_range(min_x, max_x), randf_range(min_y, max_y))
 
 	var random_dir := Vector2.from_angle(randf_range(0.0, TAU))
-	return global_position + (random_dir * randf_range(15.0, 45.0))
+	return global_position + (random_dir * randf_range(45.0, 60.0))
 
 
 ## Поведение SCOUTING: строгий бег к выбранному чанку и раскопки внутри него
@@ -381,7 +368,7 @@ func _process_field_task(delta: float) -> void:
 	wander_timer -= delta
 	if wander_timer <= 0.0:
 		var random_dir := Vector2.from_angle(randf_range(0.0, TAU))
-		target_position = global_position + (random_dir * randf_range(20.0, 50.0))
+		target_position = global_position + (random_dir * randf_range(50.0, 100.0))
 		wander_timer = randf_range(2.0, 4.0)
 
 	if global_position.distance_to(target_position) > arrive_distance:
