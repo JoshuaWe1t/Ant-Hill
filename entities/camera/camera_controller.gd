@@ -41,13 +41,13 @@ func _handle_movement(delta: float) -> void:
 	var input_dir: Vector2 = Vector2.ZERO
 
 	# 1. Считывание клавиш WASD / Стрелок
-	if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP):
+	if Input.is_action_pressed("Up"):
 		input_dir.y -= 1.0
-	if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
+	if Input.is_action_pressed("Down"):
 		input_dir.y += 1.0
-	if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT):
+	if Input.is_action_pressed("Left"):
 		input_dir.x -= 1.0
-	if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
+	if Input.is_action_pressed("Right"):
 		input_dir.x += 1.0
 
 	# 2. Смещение мышью у границы окна (Edge Panning)
