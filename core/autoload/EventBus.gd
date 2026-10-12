@@ -55,4 +55,9 @@ signal toggle_queen_commands(is_open: bool)
 signal toggle_scout_mode(is_active: bool)
 
 @warning_ignore("unused_signal")
-signal show_notification(message: String)
+signal show_notification(message: String, color: Color)
+
+@warning_ignore("unused_signal")
+signal timer_update(time_left: float)
+@warning_ignore("unused_signal")
+signal timer_is_out
