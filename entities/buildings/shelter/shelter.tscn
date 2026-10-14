@@ -1,7 +1,15 @@
-[gd_scene load_steps=3 format=3 uid="uid://8gp7dfo8q74g"]
+[gd_scene load_steps=4 format=3 uid="uid://8gp7dfo8q74g"]
 
 [ext_resource type="PackedScene" uid="uid://cdoeypllfriql" path="res://entities/buildings/building_base/building_base.tscn" id="1_3geoe"]
 [ext_resource type="Script" uid="uid://2xvslw020sxt" path="res://entities/buildings/shelter/shelter.gd" id="2_qf12w"]
+[ext_resource type="Texture2D" uid="uid://de0lldi7qmige" path="res://assets/textures/shelter.png" id="3_mt83u"]
 
 [node name="Shelter" instance=ExtResource("1_3geoe")]
 script = ExtResource("2_qf12w")
+unit_capacity_bonus = 25
+
+[node name="Sprite2D2" type="Sprite2D" parent="." index="0"]
+texture = ExtResource("3_mt83u")
+
+[node name="Sprite2D" parent="." index="5"]
+texture = ExtResource("3_mt83u")

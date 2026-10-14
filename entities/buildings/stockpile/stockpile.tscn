@@ -1,8 +1,15 @@
-[gd_scene load_steps=3 format=3 uid="uid://5hyasanrtlyp"]
+[gd_scene load_steps=4 format=3 uid="uid://5hyasanrtlyp"]
 
 [ext_resource type="PackedScene" uid="uid://cdoeypllfriql" path="res://entities/buildings/building_base/building_base.tscn" id="1_tx7pc"]
 [ext_resource type="Script" uid="uid://bw3tcs1crpiu7" path="res://entities/buildings/stockpile/stockpile.gd" id="2_n26h2"]
+[ext_resource type="Texture2D" uid="uid://di8fhn454q6is" path="res://assets/textures/stockpie.png" id="3_jtkcp"]
 
 [node name="Stockpile" instance=ExtResource("1_tx7pc")]
 script = ExtResource("2_n26h2")
 storage_capacity_bonus = 500
+
+[node name="Sprite2D2" type="Sprite2D" parent="." index="0"]
+texture = ExtResource("3_jtkcp")
+
+[node name="Sprite2D" parent="." index="5"]
+texture = ExtResource("3_jtkcp")
