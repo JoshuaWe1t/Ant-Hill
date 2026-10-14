@@ -10,10 +10,10 @@ signal queen_died
 
 # --- Жизнеобеспечение и питание Королевы ---
 @export_group("Upkeep & Hunger")
-@export var upkeep_interval: float = 60.0 ## Интервал потребления (60 сек / 1 минута)
-@export var water_upkeep: int = 20
-@export var protein_upkeep: int = 20
-@export var phytomass_upkeep: int = 20
+@export var upkeep_interval: float = 80.0 ## Интервал потребления (60 сек / 1 минута)
+@export var water_upkeep: int = 15
+@export var protein_upkeep: int = 15
+@export var phytomass_upkeep: int = 15
 
 var current_health: float = 100.0
 var is_selected: bool = false : set = _set_selected
@@ -27,6 +27,8 @@ var home_nest: Nest = null
 
 # Экспортируем сцену куколки
 @export var cocoon_scene: PackedScene
+
+var is_scout_command_on: bool = false
 
 
 # Стоимость создания куколки по GDD (Раздел 4.2)
@@ -83,6 +85,7 @@ func _ready() -> void:
 	
 	if is_instance_valid(EventBus):
 		EventBus.ui_queen_icon_clicked.connect(_on_ui_icon_clicked)
+		EventBus.toggle_scout_mode.connect(_on_scout_on)
 	
 	print("Королева инициализирована. Pickable: ", input_pickable)
 
@@ -110,9 +113,10 @@ func select_queen() -> void:
 func deselect_queen() -> void:
 	if not is_selected:
 		return
-	self.is_selected = false
-	EventBus.queen_selected.emit(false)
-	print("Выделение с Королевы снято")
+	if not is_scout_command_on:
+		self.is_selected = false
+		EventBus.queen_selected.emit(false)
+		print("Выделение с Королевы снято")
 
 
 func _set_selected(value: bool) -> void:
@@ -163,81 +167,6 @@ func _die() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if is_selected and event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed():
 		deselect_queen()
-
-
-## Задайте радиус кликабельной зоны под размер спрайта (например, 32-48 пикселей)
-#@export var click_radius: float = 40.0
-#
-#
-#func _unhandled_input(event: InputEvent) -> void:
-	#if not (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed()):
-		#return
-#
-	#var mouse_world_pos: Vector2 = get_global_mouse_position()
-	#var distance_to_click: float = global_position.distance_to(mouse_world_pos)
-#
-	## 1. Если клик попал в радиус Королевы — выбираем её
-	#if distance_to_click <= click_radius:
-		#print("Клик по Королеве зафиксирован по координатам! Дистанция: ", distance_to_click)
-		#select_queen()
-		#get_viewport().set_input_as_handled()
-	#
-	## 2. Если клик был за пределами радиуса, а Королева уже была выбрана — снимаем выбор
-	#elif is_selected:
-		#deselect_queen()
-
-
-### Запрос на производство куколки: создается сразу же
-#func produce_cocoon(type: Cocoon.AntType) -> bool:
-	#if not cocoon_scene:
-		#push_error("В инспекторе Королевы не назначена cocoon_scene!")
-		#return false
-#
-	#var cost: Dictionary = SPAWN_COSTS.get(type, {})
-	#
-	## 1. Проверяем ресурсы и списываем их
-	#if not ResourceManager.spend_resources(cost):
-		#print("Недостаточно ресурсов для создания муравья!")
-		#return false
-#
-	## 2. Мгновенно спавним куколку возле Королевы
-	#var cocoon: Cocoon = cocoon_scene.instantiate()
-	#var spawn_offset := Vector2(randf_range(-45, 45), randf_range(15, 40))
-	#cocoon.global_position = global_position + spawn_offset
-	#
-	#get_parent().add_child(cocoon)
-	#cocoon.setup(type)
-	#
-	#print("Королева моментально отложила куколку рядом с собой!")
-	#return true
-
-
-### Запрос на производство куколки: создается вокруг крупного спрайта Королевы
-#func produce_cocoon(type: Cocoon.AntType) -> bool:
-	#if not cocoon_scene:
-		#push_error("В инспекторе Королевы не назначена cocoon_scene!")
-		#return false
-#
-	#var cost: Dictionary = SPAWN_COSTS.get(type, {})
-	#
-	#if not ResourceManager.spend_resources(cost):
-		#print("Недостаточно ресурсов для создания муравья!")
-		#return false
-#
-	#var cocoon: Cocoon = cocoon_scene.instantiate()
-	#
-	## Генерируем угол и расстояние за пределы тела 128x128 (радиус 75..95 px)
-	#var random_angle: float = randf_range(0.0, TAU)
-	#var spawn_distance: float = randf_range(75.0, 95.0)
-	#var spawn_offset := Vector2.from_angle(random_angle) * spawn_distance
-	#
-	#cocoon.global_position = global_position + spawn_offset
-	#
-	#get_parent().add_child(cocoon)
-	#cocoon.setup(type)
-	#
-	#print("Куколка отложена на позицию: ", cocoon.global_position)
-	#return true
 
 
 ## Запрос на производство куколки
@@ -342,3 +271,7 @@ func _on_ui_icon_clicked() -> void:
 	if current_health > 0:
 		select_queen()
 		print("Королева выбрана через UI-иконку!")
+
+
+func _on_scout_on(mode: bool):
+	is_scout_command_on = mode
