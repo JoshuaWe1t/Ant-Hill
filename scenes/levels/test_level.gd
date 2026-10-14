@@ -16,10 +16,23 @@ var is_build_mode: bool = false
 var is_commands_mode: bool = false
 var is_scouting_mode: bool = false # Ждем ли мы клика по чанку
 
+var _time_since_last_check: float = 0.0
+const CHECK_INTERVAL: float = 0.16 # Проверка примерно каждые 10 кадров (при 60 FPS)
+
 func _ready() -> void:
 	if not entities_container:
 		entities_container = self
-
+		
+	# Выдаем игроку случайное задание на эту сессию
+	if is_instance_valid(VictoryManager):
+		VictoryManager.randomize_mission()
+		#VictoryManager.
+#enum VictoryConditionType {
+	#TOTAL_ANTS,
+	#SPECIFIC_ANT_TYPE,
+	#OPENED_CHUNKS_AREA,
+	#COLLECT_RESOURCES
+#}
 	if not nest_scene or not queen_scene:
 		push_error("Не назначены Nest Scene или Queen Scene в TestLevel!")
 		return
@@ -56,14 +69,14 @@ func _ready() -> void:
 		# Безопасное подключение клика по чанку (сигнал должен быть объявлен в EventBus)
 		if EventBus.has_signal("chunk_clicked") and not EventBus.is_connected("chunk_clicked", _on_chunk_clicked):
 			EventBus.chunk_clicked.connect(_on_chunk_clicked)
-	
-	# Настраиваем условия победы для этого конкретного уровня
-	if is_instance_valid(VictoryManager):
-		VictoryManager.active_condition = VictoryManager.VictoryConditionType.SPECIFIC_ANT_TYPE
-		VictoryManager.target_ant_type = Cocoon.AntType.SOLDIER # Например, нужны солдаты
-		VictoryManager.target_ant_type_count = 5 # Нужно 5 штук
-		
-		VictoryManager.goal_updated.emit()
+
+
+func _process(delta: float) -> void:
+	_time_since_last_check += delta
+	if _time_since_last_check >= CHECK_INTERVAL:
+		_time_since_last_check = 0.0 # Сбрасываем таймер
+		VictoryManager._check_victory_conditions()
+		VictoryManager._check_defeat_conditions()
 
 
 ## Обработка мыши с наивысшим приоритетом
@@ -95,33 +108,16 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.is_pressed():
 		
 		# Клавиша B: Меню строительства
-		if event.keycode == KEY_B:
+		if Input.is_action_just_pressed("BuidingPanel"):
+			print("test_level. PRESS B")
 			is_build_mode = !is_build_mode
 			if is_instance_valid(EventBus):
 				EventBus.toggle_build_menu.emit(is_build_mode)
 			get_viewport().set_input_as_handled()
-			
-		#elif event.keycode == KEY_T:
-			#ResourceManager.add_resources({
-				#ResourceManager.ResourceType.WOOD: 50,
-				#ResourceManager.ResourceType.CLAY: 20
-			#})
-			#print("Тест: начислены ресурсы")
-			#
-		## Горячие клавиши для превью
-		#elif event.keycode == KEY_3: _start_preview_for("shelter")
-		#elif event.keycode == KEY_4: _start_preview_for("stockpile")
-		#elif event.keycode == KEY_5: _start_preview_for("kindergarten")
-		#elif event.keycode == KEY_6: _start_preview_for("aphid_farm")
-
-		## Спавн муравьев
-		#if event.keycode == KEY_1:
-			#queen.produce_cocoon(Cocoon.AntType.WORKER)
-		#elif event.keycode == KEY_2:
-			#queen.produce_cocoon(Cocoon.AntType.SOLDIER)
 		
 		# Клавиша C: Меню команд Королевы
-		elif event.keycode == KEY_C:
+		elif Input.is_action_just_pressed("CammandPanel"):
+			print("test_level. PRESS C")
 			is_commands_mode = !is_commands_mode
 			if is_instance_valid(EventBus):
 				EventBus.toggle_queen_commands.emit(is_commands_mode)
@@ -142,6 +138,7 @@ func _confirm_placement() -> void:
 
 	if not ResourceManager.spend_resources(current_preview.build_cost):
 		print("Недостаточно ресурсов для постройки!")
+		EventBus.show_notification.emit("Not enough resources", Color(0.827, 0.737, 0.271, 1.0))
 		return
 
 	var new_building: BuildingBase = data.scene.instantiate()
@@ -155,6 +152,7 @@ func _confirm_placement() -> void:
 		var sent: int = ColonyManager.dispatch_workers_to(new_building, 2)
 		if sent < 2:
 			print("Внимание: Найдено только %d свободных рабочих из 2!" % sent)
+			EventBus.show_notification.emit("Not enough builders", Color(0.827, 0.737, 0.271, 1.0))
 
 	_cancel_preview()
 	

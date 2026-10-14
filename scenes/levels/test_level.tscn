@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://bsk1xkrns6upr"]
+[gd_scene load_steps=15 format=3 uid="uid://bsk1xkrns6upr"]
 
 [ext_resource type="Script" uid="uid://q0s66hxbnols" path="res://scenes/levels/test_level.gd" id="1_6xh4u"]
 [ext_resource type="Script" uid="uid://busce5ef8ra8q" path="res://entities/world/chunk_manager.gd" id="1_48ne7"]
@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://baovp2abgxyll" path="res://ui/queen_icon/queen_icon.tscn" id="11_jmx14"]
 [ext_resource type="PackedScene" uid="uid://b7wiohv11g8jk" path="res://ui/queen_commands_ui/queen_commands_ui.tscn" id="12_eaa0b"]
 [ext_resource type="PackedScene" uid="uid://cdum06ugy2icg" path="res://scenes/menus/game_screens/game_screens.tscn" id="13_a5rnb"]
+[ext_resource type="Texture2D" uid="uid://dj875acs3ogr6" path="res://assets/textures/main-game.png" id="14_fqldq"]
 
 [node name="TestLevel" type="Node2D"]
 script = ExtResource("1_6xh4u")
@@ -25,6 +26,11 @@ building_base_scene = ExtResource("5_2mu0v")
 points = PackedVector2Array(-2000, 0, 2000, 0)
 width = 2.0
 default_color = Color(1, 1, 0, 1)
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(626, 532)
+scale = Vector2(10.75, 3.578125)
+texture = ExtResource("14_fqldq")
 
 [node name="ChunkManager" type="Node2D" parent="."]
 script = ExtResource("1_48ne7")
