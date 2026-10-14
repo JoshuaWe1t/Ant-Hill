@@ -11,18 +11,19 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(1, 1, 1, 0.5882353)
+color = Color(0.5128885, 0.5347574, 0.19546068, 0.5882353)
 
 [node name="PausePanel" type="PanelContainer" parent="."]
+visible = false
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -253.0
-offset_top = -55.5
+offset_top = -35.25
 offset_right = 253.0
-offset_bottom = 55.5
+offset_bottom = 35.25
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 0
@@ -40,10 +41,12 @@ layout_mode = 2
 text = "Вернуться"
 
 [node name="BtnHowToPlay" type="Button" parent="PausePanel/VBox"]
+visible = false
 layout_mode = 2
 text = "Как играть"
 
 [node name="VictoryPanel" type="PanelContainer" parent="."]
+visible = false
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -62,7 +65,7 @@ layout_mode = 2
 
 [node name="Title" type="Label" parent="VictoryPanel/VBox"]
 layout_mode = 2
-text = "ПОБЕДА!"
+text = "VICTORY"
 horizontal_alignment = 1
 
 [node name="StatsLabel" type="Label" parent="VictoryPanel/VBox"]
@@ -70,7 +73,7 @@ layout_mode = 2
 
 [node name="BtnMenu" type="Button" parent="VictoryPanel/VBox"]
 layout_mode = 2
-text = "В меню"
+text = "GO TO MENU"
 
 [node name="DefeatPanel" type="PanelContainer" parent="."]
 anchors_preset = 8
@@ -91,7 +94,7 @@ layout_mode = 2
 
 [node name="Title" type="Label" parent="DefeatPanel/VBox"]
 layout_mode = 2
-text = "ПОРАЖЕНИЕ!"
+text = "DEFEAT!"
 horizontal_alignment = 1
 
 [node name="ReasonLabel" type="Label" parent="DefeatPanel/VBox"]
@@ -102,8 +105,8 @@ layout_mode = 2
 
 [node name="BtnRestart" type="Button" parent="DefeatPanel/VBox"]
 layout_mode = 2
-text = "Начать заново"
+text = "Try again..."
 
 [node name="BtnMenu" type="Button" parent="DefeatPanel/VBox"]
 layout_mode = 2
-text = "В меню"
+text = "Go to menu"

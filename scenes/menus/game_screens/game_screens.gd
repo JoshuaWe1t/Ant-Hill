@@ -18,6 +18,10 @@ extends CanvasLayer
 @onready var d_btn_restart: Button = $DefeatPanel/VBox/BtnRestart
 @onready var d_btn_menu: Button = $DefeatPanel/VBox/BtnMenu
 
+var time: float = 0.0
+var speed: float = 1.5 # Скорость перелива
+
+
 func _ready() -> void:
 	# Убедимся, что сами панели тоже могут обрабатывать клики во время паузы
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -41,6 +45,29 @@ func _ready() -> void:
 		VictoryManager.victory_achieved.connect(_on_victory)
 		VictoryManager.defeat_achieved.connect(_on_defeat)
 
+
+func _process(delta: float) -> void:
+	time += delta * speed
+	
+	# Переводим синусоиду от -1..1 в диапазон от 0.0 до 1.0
+	var wave = (sin(time) + 1.0) / 2.0
+	
+	# 1. Тон (Hue): плавно меняем в узком диапазоне коричневого (0.05 - 0.11)
+	var h = lerp(0.05, 0.11, wave)
+	
+	# 2. Насыщенность (Saturation): можно слегка менять для живости (0.5 - 0.7)
+	# Используем сдвиг по времени sin(time + 2.0), чтобы она менялась несинхронно с тоном
+	var wave_s = (sin(time + 2.0) + 1.0) / 2.0
+	var s = lerp(0.5, 0.7, wave_s)
+	
+	# 3. Яркость (Value): держим в темных пределах (0.25 - 0.45)
+	var wave_v = (sin(time + 4.0) + 1.0) / 2.0
+	var v = lerp(0.25, 0.45, wave_v)
+	
+	# Создаем цвет из HSV компонентов и задаем альфа-канал (0.5)
+	bg.color = Color.from_hsv(h, s, v, 0.5)
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		if victory_panel.visible or defeat_panel.visible:
@@ -63,8 +90,10 @@ func _resume_game() -> void:
 	bg.hide()
 	get_tree().paused = false
 
+
 func _how_to_play() -> void:
 	print("Открыть окно обучения")
+
 
 func _on_victory(message: String) -> void:
 	get_tree().paused = true
@@ -72,12 +101,14 @@ func _on_victory(message: String) -> void:
 	victory_panel.show()
 	v_stats.text = _generate_statistics(message)
 
+
 func _on_defeat(message: String) -> void:
 	get_tree().paused = true
 	bg.show()
 	defeat_panel.show()
 	d_reason.text = message
 	d_stats.text = _generate_statistics("")
+
 
 func _generate_statistics(extra_message: String) -> String:
 	var stats_text := ""
@@ -93,8 +124,9 @@ func _generate_statistics(extra_message: String) -> String:
 		var seconds = int(time_spent) % 60
 		time_spent_str = "%02d:%02d" % [minutes, seconds]
 		
-	stats_text += "Затрачено времени: %s\nИтоговая популяция: %d" % [time_spent_str, population]
+	stats_text += "Taking time: %s\nAnts total population: %d" % [time_spent_str, population]
 	return stats_text
+
 
 func _restart_level() -> void:
 	get_tree().paused = false
@@ -105,9 +137,10 @@ func _restart_level() -> void:
 	if is_instance_valid(ColonyManager):
 		ColonyManager.clear_colony_data()
 	if is_instance_valid(ResourceManager):
-		ResourceManager.clear_resources()
+		ResourceManager.reset_to_defaults()
 		
 	get_tree().reload_current_scene()
+
 
 func _go_to_menu() -> void:
 	get_tree().paused = false
