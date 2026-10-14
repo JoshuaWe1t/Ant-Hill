@@ -30,6 +30,7 @@ func can_spawn_ant() -> bool:
 func register_ant(ant: AntBase) -> bool:
 	if not can_spawn_ant():
 		print("Невозможно добавить юнита: колония переполнена (%d/%d)!" % [alive_ants.size(), max_population])
+		EventBus.show_notification.emit("Cannot add unit: colony full. Build Shelter.", Color(0.853, 0.788, 0.233, 1.0))
 		return false
 
 	if not alive_ants.has(ant):
@@ -148,14 +149,12 @@ func dispatch_foragers(target_resources: Array) -> void:
 	print("Отправлено сборщиков: %d/%d на %d типов ресурсов" % [sent, max_foragers, target_resources.size()])
 
 
-## Обновленный метод завершения задачи
 func complete_ant_task(ant: Node, task_type: int) -> void:
 	var loot: Dictionary = {}
 	
-	if task_type == 7: # FORAGING (или AntBase.State.FORAGING)
+	# Сбор ресурсов (FORAGING)
+	if task_type == 7: # AntBase.State.FORAGING
 		var total_limit: int = randi_range(70, 200)
-		
-		# Извлекаем целевые ресурсы, которые были назначены этому муравью
 		var target_resources: Array = []
 		if ant.has_meta("forage_targets"):
 			target_resources = ant.get_meta("forage_targets")
@@ -163,34 +162,39 @@ func complete_ant_task(ant: Node, task_type: int) -> void:
 			
 		if target_resources.size() > 0:
 			for res_type in target_resources:
-				# Делим общий лимит случайно между выбранными ресурсами
 				var amount: int = randi_range(5, max(5, int(total_limit / float(target_resources.size()))))
 				loot[res_type] = amount
 				total_limit -= amount
 				
 		print("Сборщик вернулся! Собрано: ", loot)
-		
+
+	# Находка при разведке (SCOUTING)
+	elif task_type == 6: # AntBase.State.SCOUTING (укажите ваш enum/код разведки)
+		# Разведчики приносят случайный бонусный ресурс
+		var scout_res: int = ResourceManager.ResourceType.values().pick_random()
+		loot[scout_res] = randi_range(15, 35)
+		print("Разведчик вернулся с образцами! Найдено: ", loot)
+
+	# Начисление и вывод уведомлений в EventBus
 	if is_instance_valid(ResourceManager) and not loot.is_empty():
 		ResourceManager.add_resources(loot)
 		
-		# Словарь склонений для красивого вывода
 		var res_names_ru = {
-			ResourceManager.ResourceType.WATER: "воды",
-			ResourceManager.ResourceType.PROTEIN: "белка",
-			ResourceManager.ResourceType.PHYTOMASS: "фитомассы",
-			ResourceManager.ResourceType.WOOD: "дерева",
-			ResourceManager.ResourceType.CLAY: "глины",
-			ResourceManager.ResourceType.RESIN: "смолы",
-			ResourceManager.ResourceType.SILK: "шелка"
+			ResourceManager.ResourceType.WATER: "water",
+			ResourceManager.ResourceType.PROTEIN: "proteins",
+			ResourceManager.ResourceType.PHYTOMASS: "phytomasses",
+			ResourceManager.ResourceType.WOOD: "woods",
+			ResourceManager.ResourceType.CLAY: "clays",
+			ResourceManager.ResourceType.RESIN: "resins",
+			ResourceManager.ResourceType.SILK: "silks"
 		}
 		
-		# Отправляем сообщение для каждого принесенного ресурса
 		if is_instance_valid(EventBus):
 			for res_type in loot:
 				var amount = loot[res_type]
 				var res_name = res_names_ru.get(res_type, "ресурсов")
-				var msg = "Добавлено %d ед. %s" % [amount, res_name]
-				EventBus.show_notification.emit(msg)
+				var msg = "Added %d %s" % [amount, res_name]
+				EventBus.show_notification.emit(msg, Color(0.2, 1.0, 0.2))
 
 
 func clear_colony_data() -> void:
@@ -200,19 +204,17 @@ func clear_colony_data() -> void:
 
 ## Создание стартового состава колонии при запуске уровня
 func spawn_initial_colony() -> void:
-	# Получаем точку спавна в стартовой комнате
 	var spawn_pos := Vector2.ZERO
 	var chunk_manager = get_tree().root.find_child("ChunkManager", true, false)
 	if is_instance_valid(chunk_manager) and chunk_manager.has_method("get_starter_spawn_point"):
 		spawn_pos = chunk_manager.get_starter_spawn_point()
 	
-	# Спавним муравьев нужных типов
-	# Предполагается, что у вас есть метод создания юнита по типу (WORKER, SOLDIER, BABYSITTER)
 	_spawn_specific_ant(Cocoon.AntType.WORKER, 5, spawn_pos)
 	_spawn_specific_ant(Cocoon.AntType.SOLDIER, 2, spawn_pos)
 	_spawn_specific_ant(Cocoon.AntType.BABYSITTER, 1, spawn_pos)
 	
 	print("Стартовый отряд успешно размещен в гнезде!")
+	_emit_update() # Отправляем сигнал в HUD, чтобы цифры (8/30) обновились
 
 
 ## Вспомогательная функция для спавна заданного количества муравьев
