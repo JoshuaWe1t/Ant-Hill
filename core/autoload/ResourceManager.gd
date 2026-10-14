@@ -21,10 +21,10 @@ const STARTING_RESOURCES: Dictionary = {
 	ResourceType.WATER: 100,
 	ResourceType.PROTEIN: 50,
 	ResourceType.PHYTOMASS: 50,
-	ResourceType.WOOD: 100,
-	ResourceType.CLAY: 100,
-	ResourceType.RESIN: 50,
-	ResourceType.SILK: 25
+	ResourceType.WOOD: 25,
+	ResourceType.CLAY: 25,
+	ResourceType.RESIN: 25,
+	ResourceType.SILK: 10
 }
 
 # Текущий баланс ресурсов
@@ -94,6 +94,7 @@ func add_resources(gain_dict: Dictionary) -> void:
 
 	if free_space <= 0:
 		print("Склады колонии переполнены! Ресурсы не могут быть приняты.")
+		EventBus.show_notification.emit("Colony storage full!\nCannot accept resources", Color(0.579, 0.0, 0.0, 1.0))
 		return
 
 	# Считаем, сколько суммарно единиц пытаются занести
@@ -109,6 +110,7 @@ func add_resources(gain_dict: Dictionary) -> void:
 	else:
 		# Если места меньше, чем пришло — заполняем остаток пропорционально
 		print("Склад почти полон. Часть ресурсов не поместилась.")
+		EventBus.show_notification.emit("Storage nearly full!\nSome resources were left behind", Color(0.427, 0.252, 0.078, 1.0))
 		var ratio: float = float(free_space) / float(incoming_total)
 		for type in gain_dict:
 			var accepted: int = int(round(gain_dict[type] * ratio))
