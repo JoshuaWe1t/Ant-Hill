@@ -1,28 +1,34 @@
 extends CanvasLayer
 
-@onready var main_panel: Panel = $MainPanel
-@onready var spawn_popup: Panel = $SpawnPopup
-@onready var forage_popup: Panel = $ForagePopup # Новая панель сбора
+@onready var main_panel: Panel = $Control/MainPanel
+@onready var spawn_popup: Panel = $Control/SpawnPopup
+@onready var forage_popup: Panel = $Control/ForagePopup
 
 # Кнопки основной панели
-@onready var btn_scout: Button = $MainPanel/VBox/BtnScout
-@onready var btn_forage: Button = $MainPanel/VBox/BtnForage
-@onready var btn_spawn: Button = $MainPanel/VBox/BtnSpawn
+@onready var btn_scout: Button = $Control/MainPanel/VBox/BtnScout
+@onready var btn_forage: Button = $Control/MainPanel/VBox/BtnForage
+@onready var btn_spawn: Button = $Control/MainPanel/VBox/BtnSpawn
 
 # Кнопки окна пополнения
-@onready var btn_worker: TextureButton = $SpawnPopup/HBox/BtnWorker
-@onready var btn_soldier: TextureButton = $SpawnPopup/HBox/BtnSoldier
-@onready var btn_babysitter: TextureButton = $SpawnPopup/HBox/BtnBabysitter
+@onready var btn_worker: TextureButton = $Control/SpawnPopup/HBox/BtnWorker
+@onready var btn_soldier: TextureButton = $Control/SpawnPopup/HBox/BtnSoldier
+@onready var btn_babysitter: TextureButton = $Control/SpawnPopup/HBox/BtnBabysitter
 
 # Элементы окна сбора ресурсов
-@onready var btn_dispatch: TextureButton = $ForagePopup/VBox/BtnDispatch
-@onready var check_water: CheckBox = $ForagePopup/VBox/Grid/CheckWater
-@onready var check_protein: CheckBox = $ForagePopup/VBox/Grid/CheckProtein
-@onready var check_phytomass: CheckBox = $ForagePopup/VBox/Grid/CheckPhytomass
-@onready var check_wood: CheckBox = $ForagePopup/VBox/Grid/CheckWood
-@onready var check_clay: CheckBox = $ForagePopup/VBox/Grid/CheckClay
-@onready var check_resin: CheckBox = $ForagePopup/VBox/Grid/CheckResin
-@onready var check_silk: CheckBox = $ForagePopup/VBox/Grid/CheckSilk
+@onready var btn_dispatch: TextureButton = $Control/ForagePopup/VBox/BtnDispatch
+@onready var check_water: CheckBox = $Control/ForagePopup/VBox/Grid/CheckWater
+@onready var check_protein: CheckBox = $Control/ForagePopup/VBox/Grid/CheckProtein
+@onready var check_phytomass: CheckBox = $Control/ForagePopup/VBox/Grid/CheckPhytomass
+@onready var check_wood: CheckBox = $Control/ForagePopup/VBox/Grid/CheckWood
+@onready var check_clay: CheckBox = $Control/ForagePopup/VBox/Grid/CheckClay
+@onready var check_resin: CheckBox = $Control/ForagePopup/VBox/Grid/CheckResin
+@onready var check_silk: CheckBox = $Control/ForagePopup/VBox/Grid/CheckSilk
+
+#
+@onready var tooltip: PanelContainer = $Control/TooltipPanel
+@onready var name_label: Label = $Control/TooltipPanel/VBoxContainer/NameLabel
+@onready var desc_label: Label = $Control/TooltipPanel/VBoxContainer/DescLabel
+@onready var req_label: Label = $Control/TooltipPanel/VBoxContainer/ReqLabel
 
 var is_menu_open: bool = false
 var is_scout_mode: bool = false
@@ -47,6 +53,14 @@ func _ready() -> void:
 	btn_worker.pressed.connect(_request_spawn.bind(Cocoon.AntType.WORKER))
 	btn_soldier.pressed.connect(_request_spawn.bind(Cocoon.AntType.SOLDIER))
 	btn_babysitter.pressed.connect(_request_spawn.bind(Cocoon.AntType.BABYSITTER))
+	
+	btn_worker.mouse_entered.connect(_on_give_desc.bind(1))
+	btn_soldier.mouse_entered.connect(_on_give_desc.bind(2))
+	btn_babysitter.mouse_entered.connect(_on_give_desc.bind(3))
+	
+	btn_worker.mouse_exited.connect(_on_hide_tooltipe)
+	btn_soldier.mouse_exited.connect(_on_hide_tooltipe)
+	btn_babysitter.mouse_exited.connect(_on_hide_tooltipe)
 	
 	# Подключение кнопки отправки
 	btn_dispatch.pressed.connect(_on_dispatch_pressed)
@@ -127,3 +141,54 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif event.keycode == KEY_3:
 			_request_spawn(Cocoon.AntType.BABYSITTER)
 			get_viewport().set_input_as_handled()
+
+
+func _on_give_desc(id: int):
+	
+	var data: Dictionary = {
+		1: {
+			"name": "Worker",
+			"description": "Do everything: collect, built and discover",
+			"cost": {
+				ResourceManager.ResourceType.WATER: 1,
+				ResourceManager.ResourceType.PROTEIN: 2,
+				ResourceManager.ResourceType.PHYTOMASS: 2
+			}
+		},
+		2: {
+			"name": "Soldier",
+			"description": "Can discover a new chunk",
+			"cost": {
+				ResourceManager.ResourceType.WATER: 2,
+				ResourceManager.ResourceType.PROTEIN: 5,
+				ResourceManager.ResourceType.PHYTOMASS: 2
+			}
+		},
+		3: {
+			"name": "Babysittier",
+			"description": "Care of coccon",
+			"cost": {
+				ResourceManager.ResourceType.WATER: 1,
+				ResourceManager.ResourceType.PROTEIN: 3,
+				ResourceManager.ResourceType.PHYTOMASS: 3
+			}
+		}
+	}
+	
+	data = data.get(id)
+	
+	name_label.text = data.get("name", "Здание")
+	desc_label.text = "Desc: %s" % [data.get("description")]
+	
+	var cost_str = "Price: "
+	var cost_dict: Dictionary = data.get("cost", {})
+	for res_type in cost_dict.keys():
+		var res_name = ResourceManager.ResourceType.keys()[res_type]
+		cost_str += "%s: %d  " % [res_name, cost_dict[res_type]]
+	req_label.text = cost_str
+	
+	tooltip.show()
+
+
+func _on_hide_tooltipe():
+	tooltip.hide()

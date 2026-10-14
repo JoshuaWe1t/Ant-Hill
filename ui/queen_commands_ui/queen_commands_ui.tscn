@@ -1,118 +1,173 @@
-[gd_scene load_steps=3 format=3 uid="uid://b7wiohv11g8jk"]
+[gd_scene load_steps=7 format=3 uid="uid://b7wiohv11g8jk"]
 
 [ext_resource type="Script" uid="uid://cgqyo5pqylmtw" path="res://ui/queen_commands_ui/queen_commands_ui.gd" id="1_5l0fo"]
-[ext_resource type="Texture2D" uid="uid://dnhnf74yu2krq" path="res://icon.svg" id="2_18wi2"]
+[ext_resource type="Texture2D" uid="uid://da0gn451q7i2x" path="res://assets/textures/btn.png" id="2_w1cb6"]
+[ext_resource type="Texture2D" uid="uid://bpjlo1nrtwbqt" path="res://assets/textures/ants1.png" id="3_bb5gy"]
+[ext_resource type="Texture2D" uid="uid://miowx5j6pr8x" path="res://assets/textures/ants3.png" id="4_mlxjn"]
+[ext_resource type="Texture2D" uid="uid://dkarowlkjq188" path="res://assets/textures/ants2.png" id="5_yl5i7"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w1cb6"]
+bg_color = Color(0.48452926, 0.48452926, 0.48452926, 0.90000004)
 
 [node name="QueenCommandsUI" type="CanvasLayer"]
 script = ExtResource("1_5l0fo")
 
-[node name="ForagePopup" type="Panel" parent="."]
-offset_left = 166.0
-offset_top = 382.0
-offset_right = 475.0
-offset_bottom = 577.0
-
-[node name="VBox" type="VBoxContainer" parent="ForagePopup"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -156.5
-offset_top = -95.5
-offset_right = 156.5
-offset_bottom = 98.5
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Label" type="Label" parent="ForagePopup/VBox"]
-layout_mode = 2
-text = "Выберите ресурсы для сбора:"
-horizontal_alignment = 1
-
-[node name="Grid" type="GridContainer" parent="ForagePopup/VBox"]
-layout_mode = 2
-columns = 3
-
-[node name="CheckWater" type="CheckBox" parent="ForagePopup/VBox/Grid"]
-layout_mode = 2
-text = "Вода"
-
-[node name="CheckProtein" type="CheckBox" parent="ForagePopup/VBox/Grid"]
-layout_mode = 2
-text = "Протеин"
-
-[node name="CheckPhytomass" type="CheckBox" parent="ForagePopup/VBox/Grid"]
-layout_mode = 2
-text = "Фитомасса"
-
-[node name="CheckWood" type="CheckBox" parent="ForagePopup/VBox/Grid"]
-layout_mode = 2
-text = "Дерево"
-
-[node name="CheckClay" type="CheckBox" parent="ForagePopup/VBox/Grid"]
-layout_mode = 2
-text = "Глина"
-
-[node name="CheckResin" type="CheckBox" parent="ForagePopup/VBox/Grid"]
-layout_mode = 2
-text = "Смола"
-
-[node name="CheckSilk" type="CheckBox" parent="ForagePopup/VBox/Grid"]
-layout_mode = 2
-text = "Шелк"
-
-[node name="BtnDispatch" type="TextureButton" parent="ForagePopup/VBox"]
-custom_minimum_size = Vector2(100, 40)
-layout_mode = 2
-texture_normal = ExtResource("2_18wi2")
-ignore_texture_size = true
-stretch_mode = 5
-
-[node name="MainPanel" type="Panel" parent="."]
-offset_left = 185.0
-offset_top = 586.0
-offset_right = 455.0
-offset_bottom = 706.0
-
-[node name="VBox" type="VBoxContainer" parent="MainPanel"]
-layout_mode = 1
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
-[node name="BtnScout" type="Button" parent="MainPanel/VBox"]
+[node name="ForagePopup" type="Panel" parent="Control"]
+custom_minimum_size = Vector2(309, 195)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.13000001
+anchor_top = 0.531
+anchor_right = 0.37100002
+anchor_bottom = 0.80100006
+offset_left = -0.40000916
+offset_top = -0.32000732
+offset_right = 0.1199646
+offset_bottom = 0.27996826
+
+[node name="VBox" type="VBoxContainer" parent="Control/ForagePopup"]
+custom_minimum_size = Vector2(313, 194)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.056
+anchor_right = 1.006
+anchor_bottom = 1.005
+offset_left = -2.0
+offset_top = -8.92
+offset_right = 0.1459961
+offset_bottom = 0.024993896
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="Control/ForagePopup/VBox"]
 layout_mode = 2
-text = "Разведка"
+text = "Select resourcers for collecting:"
+horizontal_alignment = 1
 
-[node name="BtnForage" type="Button" parent="MainPanel/VBox"]
+[node name="Grid" type="GridContainer" parent="Control/ForagePopup/VBox"]
 layout_mode = 2
-text = "Сбор ресурсов"
+columns = 3
 
-[node name="BtnSpawn" type="Button" parent="MainPanel/VBox"]
+[node name="CheckWater" type="CheckBox" parent="Control/ForagePopup/VBox/Grid"]
 layout_mode = 2
-text = "Пополнение"
+text = "Water"
 
-[node name="SpawnPopup" type="Panel" parent="."]
-offset_left = 219.0
-offset_top = 490.0
-offset_right = 419.0
-offset_bottom = 570.0
+[node name="CheckProtein" type="CheckBox" parent="Control/ForagePopup/VBox/Grid"]
+layout_mode = 2
+text = "Protein"
 
-[node name="VBox" type="VBoxContainer" parent="SpawnPopup"]
+[node name="CheckPhytomass" type="CheckBox" parent="Control/ForagePopup/VBox/Grid"]
+layout_mode = 2
+text = "Phytomass"
+
+[node name="CheckWood" type="CheckBox" parent="Control/ForagePopup/VBox/Grid"]
+layout_mode = 2
+text = "Wood"
+
+[node name="CheckClay" type="CheckBox" parent="Control/ForagePopup/VBox/Grid"]
+layout_mode = 2
+text = "Clay"
+
+[node name="CheckResin" type="CheckBox" parent="Control/ForagePopup/VBox/Grid"]
+layout_mode = 2
+text = "Resin"
+
+[node name="CheckSilk" type="CheckBox" parent="Control/ForagePopup/VBox/Grid"]
+layout_mode = 2
+text = "Silk"
+
+[node name="BtnDispatch" type="TextureButton" parent="Control/ForagePopup/VBox"]
+custom_minimum_size = Vector2(200, 40)
+layout_mode = 2
+texture_normal = ExtResource("2_w1cb6")
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="Control/ForagePopup/VBox/BtnDispatch"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.37100002
+anchor_top = 0.21200001
+anchor_right = 0.633
+anchor_bottom = 0.78700006
+offset_left = -0.12300873
+offset_top = 0.019999504
+offset_right = -0.1289978
+offset_bottom = 0.019996643
+grow_horizontal = 2
+grow_vertical = 2
+text = "Collect"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MainPanel" type="Panel" parent="Control"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.14500001
+anchor_top = 0.818
+anchor_right = 0.35500002
+anchor_bottom = 0.9850001
+offset_left = -0.6000061
+offset_top = 0.039978027
+offset_right = 0.5999756
+offset_bottom = -0.20007324
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="VBox" type="VBoxContainer" parent="Control/MainPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 10.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BtnScout" type="Button" parent="Control/MainPanel/VBox"]
+layout_mode = 2
+text = "Discover"
+
+[node name="BtnForage" type="Button" parent="Control/MainPanel/VBox"]
+layout_mode = 2
+text = "Collect resources"
+
+[node name="BtnSpawn" type="Button" parent="Control/MainPanel/VBox"]
+layout_mode = 2
+text = "Spawn"
+
+[node name="SpawnPopup" type="Panel" parent="Control"]
+visible = false
+custom_minimum_size = Vector2(200, 80)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.171
+anchor_top = 0.68100005
+anchor_right = 0.32700002
+anchor_bottom = 0.79200006
+offset_left = 0.11999512
+offset_top = -0.32003784
+offset_right = 0.43997192
+offset_bottom = -0.24005127
+
+[node name="VBox" type="VBoxContainer" parent="Control/SpawnPopup"]
 visible = false
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="Label" type="Label" parent="SpawnPopup/VBox"]
+[node name="Label" type="Label" parent="Control/SpawnPopup/VBox"]
 layout_mode = 2
 text = "1 - Рабочий | 2 - Солдат | 3 - Нянька"
 
-[node name="HBox" type="HBoxContainer" parent="SpawnPopup"]
+[node name="HBox" type="HBoxContainer" parent="Control/SpawnPopup"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -121,23 +176,89 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 10
 
-[node name="BtnWorker" type="TextureButton" parent="SpawnPopup/HBox"]
+[node name="BtnWorker" type="TextureButton" parent="Control/SpawnPopup/HBox"]
 custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
-texture_normal = ExtResource("2_18wi2")
+texture_normal = ExtResource("3_bb5gy")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="BtnSoldier" type="TextureButton" parent="SpawnPopup/HBox"]
+[node name="Label" type="Label" parent="Control/SpawnPopup/HBox/BtnWorker"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -10.0
+offset_top = -23.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "1"
+
+[node name="BtnSoldier" type="TextureButton" parent="Control/SpawnPopup/HBox"]
 custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
-texture_normal = ExtResource("2_18wi2")
+texture_normal = ExtResource("4_mlxjn")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="BtnBabysitter" type="TextureButton" parent="SpawnPopup/HBox"]
+[node name="Label" type="Label" parent="Control/SpawnPopup/HBox/BtnSoldier"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -10.0
+offset_top = -23.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "2"
+
+[node name="BtnBabysitter" type="TextureButton" parent="Control/SpawnPopup/HBox"]
 custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
-texture_normal = ExtResource("2_18wi2")
+texture_normal = ExtResource("5_yl5i7")
 ignore_texture_size = true
 stretch_mode = 5
+
+[node name="Label" type="Label" parent="Control/SpawnPopup/HBox/BtnBabysitter"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -10.0
+offset_top = -23.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "3"
+
+[node name="TooltipPanel" type="PanelContainer" parent="Control"]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.15
+anchor_top = 0.50600004
+anchor_right = 0.34300002
+anchor_bottom = 0.66200006
+offset_top = -0.32003784
+offset_right = -0.040039063
+offset_bottom = 0.35995483
+theme_override_styles/panel = SubResource("StyleBoxFlat_w1cb6")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/TooltipPanel"]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="Control/TooltipPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="DescLabel" type="Label" parent="Control/TooltipPanel/VBoxContainer"]
+layout_mode = 2
+autowrap_mode = 2
+
+[node name="ReqLabel" type="Label" parent="Control/TooltipPanel/VBoxContainer"]
+layout_mode = 2
+autowrap_mode = 2
