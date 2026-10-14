@@ -75,11 +75,11 @@ func _on_queen_selected(is_selected: bool) -> void:
 	_set_menu_state(is_selected)
 
 
-func _on_btn_hovered(data: Dictionary, btn: TextureButton) -> void:
+func _on_btn_hovered(data: Dictionary, _btn: TextureButton) -> void:
 	name_label.text = data.get("name", "Здание")
-	desc_label.text = "Требуется рабочих: %d\nВремя постройки: %s сек" % [data.get("workers_needed", 2), data.get("build_duration", 30)]
+	desc_label.text = "Desc: %s\nRequiers workers: %d\nTime to build: %s sec." % [data.get("description", ""), data.get("workers_needed", 2), data.get("build_duration", 30)]
 	
-	var cost_str = "Цена: "
+	var cost_str = "Price: "
 	var cost_dict: Dictionary = data.get("cost", {})
 	for res_type in cost_dict.keys():
 		var res_name = ResourceManager.ResourceType.keys()[res_type]
