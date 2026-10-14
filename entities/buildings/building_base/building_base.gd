@@ -12,7 +12,7 @@ enum BuildState {
 
 @export_group("Construction Profile")
 @export var building_id: String = "building_base"
-@export var building_name: String = "Постройка"
+@export var building_name: String = ""
 @export var build_duration: float = 30.0     ## Базовое время строительства (в секундах)
 @export var required_workers: int = 2       ## Ровно 2 юнита по GDD
 @export var building_size: Vector2 = Vector2(100, 100)
@@ -25,15 +25,16 @@ var assigned_workers: Array[AntBase] = []
 @onready var collision_shape: CollisionShape2D = get_node_or_null("CollisionShape2D")
 @onready var progress_bar: ProgressBar = get_node_or_null("ProgressBar")
 @onready var status_label: Label = get_node_or_null("StatusLabel")
-
+@onready var sprite: Sprite2D = get_node_or_null("Sprite2D")
 
 func _ready() -> void:
 	z_index = 2
 	collision_layer = 1
 	collision_mask = 0
 
+
 	add_to_group("buildings")
-	
+	EventBus.build_button_pressed.connect(_on_setup_texture)
 	# ИСПРАВЛЕНИЕ: Принудительно отвязываем якоря, чтобы ColorRect не схлопывался в 0x0
 	if color_rect:
 		color_rect.set_anchors_preset(Control.PRESET_TOP_LEFT, true)
@@ -152,7 +153,9 @@ func _complete_construction() -> void:
 
 	if is_instance_valid(EventBus):
 		EventBus.building_construction_finished.emit(self)
-
+	
+	#sprite.texture = texture
+	color_rect.visible = false
 	_on_operational_ready()
 
 
@@ -172,8 +175,11 @@ func _update_ui_state() -> void:
 
 	match current_state:
 		BuildState.BLUEPRINT:
-			status_label.text = "Ожидание: %d/%d рабочих" % [assigned_workers.size(), required_workers]
+			status_label.text = "Waiting for: %d/%d workers" % [assigned_workers.size(), required_workers]
 		BuildState.UNDER_CONSTRUCTION:
-			status_label.text = "Строится..."
+			status_label.text = "Building..."
 		BuildState.OPERATIONAL:
 			status_label.text = building_name
+
+func _on_setup_texture(id: String):
+	print('BUIDLINGBASE ', id)
