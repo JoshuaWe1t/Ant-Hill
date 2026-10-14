@@ -73,16 +73,6 @@ func _check_inside_unlocked_chunk() -> bool:
 
 	return true
 
-#
-#func _on_area_entered(area: Area2D) -> void:
-	#if area is Nest or area is BuildingBase or area.is_in_group("buildings"):
-		#overlapping_buildings_count += 1
-#
-#
-#func _on_area_exited(area: Area2D) -> void:
-	#if area is Nest or area is BuildingBase or area.is_in_group("buildings"):
-		#overlapping_buildings_count = maxi(0, overlapping_buildings_count - 1)
-
 func _on_area_entered(area: Area2D) -> void:
 	if area is Nest or area.is_in_group("buildings"):
 		overlapping_buildings_count += 1
