@@ -15,10 +15,18 @@ extends CanvasLayer
 @onready var soldiers_label: Label = $UIControl/ColonyPanel/MarginContainer/HBoxContainer/SoldiersBox/Value
 @onready var babysitters_label: Label = $UIControl/ColonyPanel/MarginContainer/HBoxContainer/BabysittersBox/Value
 @onready var storage_label: Label = $UIControl/ColonyPanel/MarginContainer/HBoxContainer/StorageBox/Value
+@onready var ants_total_value: Label = $UIControl/ColonyPanel/MarginContainer/HBoxContainer/AntsTotal/Value
+
 
 # Блок миссии и таймера (Левый верхний угол по GDD)
 @onready var timer_label: Label = $UIControl/MissionContainer/TimerLabel
 @onready var quest_label: Label = $UIControl/MissionContainer/QuestLabel
+
+#
+@onready var game_timer: Timer #= $GameTimer
+# Настройки времени
+@export var time_limit_seconds: float = 600.0
+var time_left: float = 0.0
 
 var starvation_tween: Tween = null
 
@@ -50,6 +58,12 @@ func _ready() -> void:
 		ResourceManager.ResourceType.SILK: silk_label
 	}
 	
+	game_timer = Timer.new()
+	game_timer.wait_time = time_limit_seconds
+	time_left = time_limit_seconds
+	game_timer.autostart = true
+	game_timer.timeout.connect(_on_timeout_game_timer)
+	
 	# Подписываемся на события менеджера ресурсов
 	ResourceManager.resource_changed.connect(_on_resource_changed)
 	ResourceManager.resources_updated.connect(_on_resources_updated)
@@ -61,7 +75,7 @@ func _ready() -> void:
 	_on_resources_updated(ResourceManager.resources)
 	
 	if is_instance_valid(VictoryManager):
-		VictoryManager.session_time_updated.connect(update_timer_display)
+		#VictoryManager.session_time_updated.connect(update_timer_display)
 		VictoryManager.victory_achieved.connect(_on_victory_achieved)
 		VictoryManager.defeat_achieved.connect(_on_defeat_achieved)
 		
@@ -72,6 +86,13 @@ func _ready() -> void:
 		ColonyManager.population_updated.connect(_on_population_changed)
 		# Используем геттер вместо прямого обращения к .size()
 		_update_colony_panel(ColonyManager.get_current_population(), ColonyManager.get_max_population())
+
+
+func _process(delta: float) -> void:
+	time_left -= delta
+	
+	update_timer_display(time_left)
+	EventBus.timer_update.emit(time_left)
 
 
 ## Точечное обновление при изменении конкретного ресурса
@@ -90,12 +111,16 @@ func _on_resources_updated(all_resources: Dictionary) -> void:
 			_resource_labels[type].text = str(all_resources[type])
 
 
-## Публичные методы для обновления таймера и квеста из GameManager
-func update_timer_display(seconds_left: float) -> void:
+## Публичные методы для обновления таймера
+func update_timer_display(seconds_left: float = 0) -> void:
 	var total_seconds: int = int(seconds_left)
 	var minutes: int = floori(total_seconds / 60.0)
 	var seconds: int = total_seconds % 60
 	timer_label.text = "%02d:%02d" % [minutes, seconds]
+	
+	if total_seconds <= 0:
+		EventBus.timer_is_out.emit()
+		game_timer.stop()
 
 
 func set_quest_text(description: String) -> void:
@@ -212,7 +237,8 @@ func _on_show_notification(message: String, color: Color = Color(0.6, 1.0, 0.6))
 	)
 
 ## Динамический пересчет и обновление значений панели колонии
-func _update_colony_panel(current: int, max_pop: int) -> void:
+func _update_colony_panel(_current: int, _max_pop: int) -> void:
+	var ants_total: int = 0
 	if not is_instance_valid(ColonyManager):
 		return
 
@@ -237,9 +263,18 @@ func _update_colony_panel(current: int, max_pop: int) -> void:
 		soldiers_label.text = str(soldiers_count)
 	if babysitters_label:
 		babysitters_label.text = str(babysitters_count)
+	
+	ants_total = workers_count + soldiers_count + babysitters_count
+	ants_total_value.text = "%d/%d" % [ants_total, ColonyManager.max_population]
 
 
 ## Срабатывает при изменении суммарного объема ресурсов или постройке складов
 func _on_storage_limit_updated(current_total: int, max_capacity: int) -> void:
 	if storage_label:
 		storage_label.text = "%d/%d" % [current_total, max_capacity]
+
+
+func _on_timeout_game_timer():
+	print("HUD: _on_timeout_game_timer")
+	EventBus.timer_is_out.emit()
+	game_timer.stop()

@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://bvqqyi2svol2k"]
+[gd_scene load_steps=14 format=3 uid="uid://bvqqyi2svol2k"]
 
 [ext_resource type="Script" uid="uid://18v8l0tyo7mv" path="res://ui/hud/hud.gd" id="1_4d6w6"]
 [ext_resource type="Texture2D" uid="uid://bcrud33f3hk5d" path="res://assets/textures/icons-resources1.png" id="2_aixkq"]
@@ -8,10 +8,11 @@
 [ext_resource type="Texture2D" uid="uid://d4e7rcryn8duc" path="res://assets/textures/icons-resources5.png" id="6_gv4gi"]
 [ext_resource type="Texture2D" uid="uid://cqv1tuy5wmqdr" path="res://assets/textures/icons-resources6.png" id="7_5mn0o"]
 [ext_resource type="Texture2D" uid="uid://bqm41j00jwsre" path="res://assets/textures/icons-resources7.png" id="8_3mxrk"]
-[ext_resource type="Texture2D" uid="uid://d0ws8ly530atj" path="res://assets/textures/icons-ants-res1.png" id="9_p3vm3"]
-[ext_resource type="Texture2D" uid="uid://b406c70dr2xhw" path="res://assets/textures/icons-ants-res2.png" id="10_gv4gi"]
-[ext_resource type="Texture2D" uid="uid://ctlwtprach5ag" path="res://assets/textures/icons-ants-res3.png" id="11_5mn0o"]
+[ext_resource type="Texture2D" uid="uid://dv5lt2hqgiryj" path="res://assets/textures/ant-total.png" id="9_gv4gi"]
+[ext_resource type="Texture2D" uid="uid://bpjlo1nrtwbqt" path="res://assets/textures/ants1.png" id="10_5mn0o"]
+[ext_resource type="Texture2D" uid="uid://miowx5j6pr8x" path="res://assets/textures/ants3.png" id="11_3mxrk"]
 [ext_resource type="Texture2D" uid="uid://ct712rg61mp4a" path="res://assets/textures/icons-ants-res4.png" id="12_3mxrk"]
+[ext_resource type="Texture2D" uid="uid://dkarowlkjq188" path="res://assets/textures/ants2.png" id="12_6gxmt"]
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_4d6w6")
@@ -169,13 +170,26 @@ mouse_filter = 2
 layout_mode = 2
 mouse_filter = 2
 
+[node name="AntsTotal" type="HBoxContainer" parent="UIControl/ColonyPanel/MarginContainer/HBoxContainer"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="UIControl/ColonyPanel/MarginContainer/HBoxContainer/AntsTotal"]
+layout_mode = 2
+texture = ExtResource("9_gv4gi")
+expand_mode = 2
+
+[node name="Value" type="Label" parent="UIControl/ColonyPanel/MarginContainer/HBoxContainer/AntsTotal"]
+layout_mode = 2
+text = "1000"
+
 [node name="WorkersBox" type="HBoxContainer" parent="UIControl/ColonyPanel/MarginContainer/HBoxContainer"]
 layout_mode = 2
 mouse_filter = 2
 
 [node name="Icon" type="TextureRect" parent="UIControl/ColonyPanel/MarginContainer/HBoxContainer/WorkersBox"]
 layout_mode = 2
-texture = ExtResource("9_p3vm3")
+texture = ExtResource("10_5mn0o")
 expand_mode = 2
 
 [node name="Value" type="Label" parent="UIControl/ColonyPanel/MarginContainer/HBoxContainer/WorkersBox"]
@@ -188,7 +202,7 @@ mouse_filter = 2
 
 [node name="Icon" type="TextureRect" parent="UIControl/ColonyPanel/MarginContainer/HBoxContainer/SoldiersBox"]
 layout_mode = 2
-texture = ExtResource("10_gv4gi")
+texture = ExtResource("11_3mxrk")
 expand_mode = 2
 
 [node name="Value" type="Label" parent="UIControl/ColonyPanel/MarginContainer/HBoxContainer/SoldiersBox"]
@@ -201,7 +215,7 @@ mouse_filter = 2
 
 [node name="Icon" type="TextureRect" parent="UIControl/ColonyPanel/MarginContainer/HBoxContainer/BabysittersBox"]
 layout_mode = 2
-texture = ExtResource("11_5mn0o")
+texture = ExtResource("12_6gxmt")
 expand_mode = 2
 
 [node name="Value" type="Label" parent="UIControl/ColonyPanel/MarginContainer/HBoxContainer/BabysittersBox"]
@@ -242,3 +256,6 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 text = "ВНИМАНИЕ! КОРОЛЕВА ГОЛОДАЕТ!"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="GameTimer" type="Timer" parent="."]
+autostart = true
