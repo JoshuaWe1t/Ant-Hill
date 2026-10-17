@@ -34,7 +34,7 @@ var starvation_tween: Tween = null
 var _resource_labels: Dictionary = {}
 
 # Счетчик для смещения текста, чтобы сообщения не слипались в одну кучу
-var _notification_count: int = 0
+var active_notifications: Array[Label] = []
 var current_mission_text: String = ""
 
 func _ready() -> void:
@@ -46,7 +46,7 @@ func _ready() -> void:
 		EventBus.queen_starving.connect(_on_queen_starving)
 		EventBus.queen_fed.connect(_on_queen_fed)
 		EventBus.show_notification.connect(_on_show_notification)
-		
+				
 	# Формируем соответствие enum -> label
 	_resource_labels = {
 		ResourceManager.ResourceType.WATER: water_label,
@@ -193,6 +193,7 @@ func _on_population_changed(current: int, max_pop: int) -> void:
 	if is_instance_valid(VictoryManager) and not VictoryManager.is_game_over:
 		_update_goal_text()
 
+
 ## Срабатывает при истечении таймера
 func _on_defeat_achieved(message: String) -> void:
 	set_quest_text("ПОРАЖЕНИЕ: " + message)
@@ -202,39 +203,47 @@ func _on_defeat_achieved(message: String) -> void:
 		quest_label.modulate = Color(1.0, 0.2, 0.2)
 
 
-## Создает всплывающий текст справа по центру экрана
 func _on_show_notification(message: String, color: Color = Color(0.6, 1.0, 0.6)) -> void:
 	var label := Label.new()
 	label.text = message
-	label.add_theme_color_override("font_color", color) # Приятный зеленый цвет
+	label.add_theme_color_override("font_color", color)
 	label.add_theme_font_size_override("font_size", 18)
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	label.custom_minimum_size.x = 250
 	
-	# Добавляем на слой UIControl, чтобы текст был поверх всего
 	$UIControl.add_child(label)
 	
+	# Очищаем массив от уже исчезнувших узлов
+	active_notifications = active_notifications.filter(func(l): return is_instance_valid(l))
+	
 	var screen_size := get_viewport().get_visible_rect().size
-	# X: отступ справа (около 280 пикселей от края)
-	# Y: по центру, плюс смещение вниз, если висит несколько уведомлений
-	var start_x := screen_size.x - 280.0
-	var start_y := (screen_size.y / 2.0) + (_notification_count * 25.0) 
+	var base_x := screen_size.x - 280.0
+	var base_y := screen_size.y / 2.0
 	
-	label.position = Vector2(start_x, start_y)
-	_notification_count += 1
+	var start_y := base_y
 	
-	# Создаем анимацию
+	# Если на экране уже есть уведомления, проверяем позицию самого последнего
+	if active_notifications.size() > 0:
+		var last_label = active_notifications[-1]
+		# Требуем, чтобы новое сообщение было как минимум на 30 пикселей НИЖЕ предыдущего
+		var required_y = last_label.position.y + 30.0
+		# Берем максимальное значение: спавним либо в базовой точке, либо ниже последней строки
+		start_y = maxf(base_y, required_y)
+	
+	label.position = Vector2(base_x, start_y)
+	active_notifications.append(label)
+	
+	# Запускаем анимацию плавного полета вверх и исчезновения
 	var tween := create_tween().set_parallel(true)
-	# Движение вверх на 100px за 3 секунды
 	tween.tween_property(label, "position:y", start_y - 100.0, 5.0).set_ease(Tween.EASE_OUT)
-	# Плавное исчезновение
 	tween.tween_property(label, "modulate:a", 0.0, 5.0).set_ease(Tween.EASE_IN_OUT)
 	
-	# По завершении удаляем узел и откатываем счетчик
 	tween.chain().tween_callback(func():
+		if active_notifications.has(label):
+			active_notifications.erase(label)
 		label.queue_free()
-		_notification_count -= 1
-		if _notification_count < 0:
-			_notification_count = 0
 	)
+
 
 ## Динамический пересчет и обновление значений панели колонии
 func _update_colony_panel(_current: int, _max_pop: int) -> void:
