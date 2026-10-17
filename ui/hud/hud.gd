@@ -8,22 +8,35 @@ extends CanvasLayer
 @onready var clay_label: Label = $UIControl/ResourcesPanel/MarginContainer/HBoxContainer/ClayBox/Value
 @onready var resin_label: Label = $UIControl/ResourcesPanel/MarginContainer/HBoxContainer/ResinBox/Value
 @onready var silk_label: Label = $UIControl/ResourcesPanel/MarginContainer/HBoxContainer/SilkBox/Value
-@onready var starvation_banner: PanelContainer = $StarvationBanner
-@onready var banner_label: Label = $StarvationBanner/BannerLabel
 # Ссылки на элементы новой панели
 @onready var workers_label: Label = $UIControl/ColonyPanel/MarginContainer/HBoxContainer/WorkersBox/Value
 @onready var soldiers_label: Label = $UIControl/ColonyPanel/MarginContainer/HBoxContainer/SoldiersBox/Value
 @onready var babysitters_label: Label = $UIControl/ColonyPanel/MarginContainer/HBoxContainer/BabysittersBox/Value
 @onready var storage_label: Label = $UIControl/ColonyPanel/MarginContainer/HBoxContainer/StorageBox/Value
 @onready var ants_total_value: Label = $UIControl/ColonyPanel/MarginContainer/HBoxContainer/AntsTotal/Value
-
-
 # Блок миссии и таймера (Левый верхний угол по GDD)
 @onready var timer_label: Label = $UIControl/MissionContainer/TimerLabel
 @onready var quest_label: Label = $UIControl/MissionContainer/QuestLabel
+# Кнопки для вывода подсказки при наведении
+@onready var water_tip: TextureButton = $UIControl/ResourcesPanel/MarginContainer/HBoxContainer/WaterBox/Icon/WaterTip
+@onready var protein_tip: TextureButton = $UIControl/ResourcesPanel/MarginContainer/HBoxContainer/ProteinBox/Icon/ProteinTip
+@onready var phytomass_tip: TextureButton = $UIControl/ResourcesPanel/MarginContainer/HBoxContainer/PhytomassBox/Icon/PhytomassTip
+@onready var wood_tip: TextureButton = $UIControl/ResourcesPanel/MarginContainer/HBoxContainer/WoodBox/Icon/WoodTip
+@onready var clay_tip: TextureButton = $UIControl/ResourcesPanel/MarginContainer/HBoxContainer/ClayBox/Icon/ClayTip
+@onready var resin_tip: TextureButton = $UIControl/ResourcesPanel/MarginContainer/HBoxContainer/ResinBox/Icon/ResinTip
+@onready var silk_tip: TextureButton = $UIControl/ResourcesPanel/MarginContainer/HBoxContainer/SilkBox/Icon/SilkTip
+@onready var ants_tip: TextureButton = $UIControl/ColonyPanel/MarginContainer/HBoxContainer/AntsTotal/Icon/AntsTip
+@onready var workers_tip: TextureButton = $UIControl/ColonyPanel/MarginContainer/HBoxContainer/WorkersBox/Icon/WorkersTip
+@onready var solder_tip: TextureButton = $UIControl/ColonyPanel/MarginContainer/HBoxContainer/SoldiersBox/Icon/SolderTip
+@onready var babysitter_tip: TextureButton = $UIControl/ColonyPanel/MarginContainer/HBoxContainer/BabysittersBox/Icon/BabysitterTip
+@onready var storage_tip: TextureButton = $UIControl/ColonyPanel/MarginContainer/HBoxContainer/StorageBox/Icon/StorageTip
+# 
+@onready var tooltip: PanelContainer = $UIControl/Tooltip
+@onready var desc_label: Label = $UIControl/Tooltip/MarginContainer/VBoxContainer/DescLabel
 
-#
-@onready var game_timer: Timer #= $GameTimer
+@export var tip_offset: Vector2 = Vector2(45, 25) # Смещение от курсора
+
+@onready var game_timer: Timer
 # Настройки времени
 @export var time_limit_seconds: float = 600.0
 var time_left: float = 0.0
@@ -38,13 +51,11 @@ var active_notifications: Array[Label] = []
 var current_mission_text: String = ""
 
 func _ready() -> void:
-	if starvation_banner:
-		starvation_banner.modulate.a = 0.0
 
 	# Подключаем сигналы шины событий
 	if is_instance_valid(EventBus):
-		EventBus.queen_starving.connect(_on_queen_starving)
-		EventBus.queen_fed.connect(_on_queen_fed)
+		#EventBus.queen_starving.connect(_on_queen_starving)
+		#EventBus.queen_fed.connect(_on_queen_fed)
 		EventBus.show_notification.connect(_on_show_notification)
 				
 	# Формируем соответствие enum -> label
@@ -86,6 +97,32 @@ func _ready() -> void:
 		ColonyManager.population_updated.connect(_on_population_changed)
 		# Используем геттер вместо прямого обращения к .size()
 		_update_colony_panel(ColonyManager.get_current_population(), ColonyManager.get_max_population())
+		
+	water_tip.mouse_entered.connect(_on_show_tip.bind(1))
+	protein_tip.mouse_entered.connect(_on_show_tip.bind(2))
+	phytomass_tip.mouse_entered.connect(_on_show_tip.bind(3))
+	wood_tip.mouse_entered.connect(_on_show_tip.bind(4))
+	clay_tip.mouse_entered.connect(_on_show_tip.bind(5))
+	resin_tip.mouse_entered.connect(_on_show_tip.bind(6))
+	silk_tip.mouse_entered.connect(_on_show_tip.bind(7))
+	ants_tip.mouse_entered.connect(_on_show_tip.bind(8))
+	workers_tip.mouse_entered.connect(_on_show_tip.bind(9))
+	solder_tip.mouse_entered.connect(_on_show_tip.bind(10))
+	babysitter_tip.mouse_entered.connect(_on_show_tip.bind(11))
+	storage_tip.mouse_entered.connect(_on_show_tip.bind(12))
+
+	water_tip.mouse_exited.connect(_on_hide_tip)
+	protein_tip.mouse_exited.connect(_on_hide_tip)
+	phytomass_tip.mouse_exited.connect(_on_hide_tip)
+	wood_tip.mouse_exited.connect(_on_hide_tip)
+	clay_tip.mouse_exited.connect(_on_hide_tip)
+	resin_tip.mouse_exited.connect(_on_hide_tip)
+	silk_tip.mouse_exited.connect(_on_hide_tip)
+	ants_tip.mouse_exited.connect(_on_hide_tip)
+	workers_tip.mouse_exited.connect(_on_hide_tip)
+	solder_tip.mouse_exited.connect(_on_hide_tip)
+	babysitter_tip.mouse_exited.connect(_on_hide_tip)
+	storage_tip.mouse_exited.connect(_on_hide_tip)
 
 
 func _process(delta: float) -> void:
@@ -93,6 +130,10 @@ func _process(delta: float) -> void:
 	
 	update_timer_display(time_left)
 	EventBus.timer_update.emit(time_left)
+	
+	# Добавляем обновление позиции тултипа, если он отображается
+	if tooltip and tooltip.visible:
+		update_position()
 
 
 ## Точечное обновление при изменении конкретного ресурса
@@ -127,41 +168,35 @@ func set_quest_text(description: String) -> void:
 	quest_label.text = description
 
 
-## Срабатывает, когда Королеве не хватило ресурсов
-func _on_queen_starving(missing_amount: int) -> void:
-	if not starvation_banner:
-		return
-
-	if banner_label:
-		banner_label.text = "КОРОЛЕВА ГОЛОДАЕТ! ДЕФИЦИТ РЕСУРСОВ: %d" % missing_amount
-
-	# Прерываем предыдущую анимацию, если она шла
-	if starvation_tween and starvation_tween.is_valid():
-		starvation_tween.kill()
-
-	starvation_tween = create_tween().set_loops(4) # Мигаем 4 раза
-	# Пульсирующий красный цвет
-	starvation_tween.tween_property(starvation_banner, "modulate", Color(0.974, 0.822, 0.154, 1.0), 0.4)
-	starvation_tween.tween_property(starvation_banner, "modulate", Color(1.0, 0.2, 0.2, 0.2), 0.4)
-	
-	# После завершения пульсации плавно скрываем баннер
-	starvation_tween.finished.connect(func():
-		var fade_out := create_tween()
-		fade_out.tween_property(starvation_banner, "modulate:a", 0.0, 0.5)
-	)
+### Срабатывает, когда Королеве не хватило ресурсов
+#func _on_queen_starving(missing_amount: int) -> void:
+	## Прерываем предыдущую анимацию, если она шла
+	#if starvation_tween and starvation_tween.is_valid():
+		#starvation_tween.kill()
+#
+	#starvation_tween = create_tween().set_loops(4) # Мигаем 4 раза
+	## Пульсирующий красный цвет
+	#starvation_tween.tween_property(starvation_banner, "modulate", Color(0.974, 0.822, 0.154, 1.0), 0.4)
+	#starvation_tween.tween_property(starvation_banner, "modulate", Color(1.0, 0.2, 0.2, 0.2), 0.4)
+	#
+	## После завершения пульсации плавно скрываем баннер
+	#starvation_tween.finished.connect(func():
+		#var fade_out := create_tween()
+		#fade_out.tween_property(starvation_banner, "modulate:a", 0.0, 0.5)
+	#)
 
 
-## Срабатывает, когда Королева успешно поела
-func _on_queen_fed() -> void:
-	if not starvation_banner:
-		return
-
-	if starvation_tween and starvation_tween.is_valid():
-		starvation_tween.kill()
-
-	# Плавно убираем предупреждение, если запасы восполнены
-	var fade_out := create_tween()
-	fade_out.tween_property(starvation_banner, "modulate:a", 0.0, 0.3)
+### Срабатывает, когда Королева успешно поела
+#func _on_queen_fed() -> void:
+	##if not starvation_banner:
+		##return
+#
+	#if starvation_tween and starvation_tween.is_valid():
+		#starvation_tween.kill()
+#
+	## Плавно убираем предупреждение, если запасы восполнены
+	#var fade_out := create_tween()
+	#fade_out.tween_property(starvation_banner, "modulate:a", 0.0, 0.3)
 
 
 ## Первичное отображение текущей цели при запуске уровня
@@ -287,3 +322,55 @@ func _on_timeout_game_timer():
 	print("HUD: _on_timeout_game_timer")
 	EventBus.timer_is_out.emit()
 	game_timer.stop()
+
+
+func _on_show_tip(id: int):
+	var tips: Dictionary = {
+		1: "Water supplies",
+		2: "Protein supplies",
+		3: "Phytomass supplies",
+		4: "Wood suplplies",
+		5: "Clay supplies",
+		6: "Resin supplies",
+		7: "Silk supplies",
+		8: "Colony size",
+		9: "Workers",
+		10: "Soldiers",
+		11: "babysittiers",
+		12: "Storage Capacity"		
+	}
+	var tip = tips.get(id, 0)
+	desc_label.text = tip
+	
+	tooltip.show()
+
+
+func _on_hide_tip():
+	tooltip.hide()
+
+
+func update_position() -> void:
+	var mouse_pos = tooltip.get_global_mouse_position()
+	var viewport_size = tooltip.get_viewport_rect().size
+	var tooltip_size = tooltip.size
+
+	# Базовая позиция: справа-снизу от курсора с учетом отступа
+	var target_pos = mouse_pos + tip_offset
+
+	# --- Проверка по горизонтали (X) ---
+	# Если подсказка вылезает за правый край экрана, переносим её влево от курсора
+	if target_pos.x + tooltip_size.x > viewport_size.x:
+		target_pos.x = mouse_pos.x - tooltip_size.x - tip_offset.x
+	# На случай если курсор у самого левого края экрана
+	elif target_pos.x < 0:
+		target_pos.x = mouse_pos.x + tip_offset.x
+		
+	# --- Проверка по вертикали (Y) ---
+	# Если подсказка вылезает за нижний край экрана, переносим её вверх от курсора
+	if target_pos.y + tooltip_size.y > viewport_size.y:
+		target_pos.y = mouse_pos.y - tooltip_size.y - tip_offset.y
+	# На случай если курсор у самого верхнего края экрана
+	elif target_pos.y < 0:
+		target_pos.y = mouse_pos.y + tip_offset.y
+		
+	tooltip.global_position = target_pos
