@@ -17,6 +17,8 @@ func _on_operational_ready() -> void:
 	if is_instance_valid(ColonyManager):
 		ColonyManager.add_population_capacity(unit_capacity_bonus)
 		print("Укрытие построено! Лимит колонии увеличен на +%d юнитов." % unit_capacity_bonus)
+		EventBus.show_notification.emit("Shelter built! Colony limit increased by +%d units."  % unit_capacity_bonus, 
+		Color(0.547, 0.492, 0.223, 1.0))
 
 
 func _exit_tree() -> void:

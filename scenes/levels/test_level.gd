@@ -205,3 +205,5 @@ func _on_chunk_clicked(chunk: Chunk) -> void:
 				EventBus.toggle_scout_mode.emit(false)
 	else:
 		print("Нельзя исследовать этот чанк! Выберите закрытый чанк, граничащий с открытым.")
+		EventBus.show_notification.emit("This chunk cannot be explored! Choose a locked chunk bordering an open one.", 
+		Color(0.547, 0.492, 0.223, 1.0))

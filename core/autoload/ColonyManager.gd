@@ -12,7 +12,8 @@ func add_population_capacity(bonus: int) -> void:
 	max_population += bonus
 	_emit_update()
 	print("Лимит популяции колонии увеличен на %d. Всего мест: %d" % [bonus, max_population])
-
+	EventBus.show_notification.emit("Colony population limit increased by %d. Total: %d" % [bonus, max_population],
+		Color(0.547, 0.492, 0.223, 1.0))
 
 ## Снятие жилых мест (при разрушении здания)
 func remove_population_capacity(bonus: int) -> void:
@@ -219,9 +220,7 @@ func spawn_initial_colony() -> void:
 
 ## Вспомогательная функция для спавна заданного количества муравьев
 func _spawn_specific_ant(ant_type: Cocoon.AntType, count: int, pos: Vector2) -> void:
-	# Если у вас в Queen или ColonyManager уже настроен инстансинг сцен муравьев,
-	# вы можете вызывать его напрямую. Пример через предзагруженную сцену муравья:
-	var ant_scene = preload("res://entities/ants/ant_base.tscn") # Укажите ваш путь к сцене муравья
+	var ant_scene = preload("res://entities/ants/ant_base.tscn") 
 	
 	for i in range(count):
 		if ant_scene:

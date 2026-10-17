@@ -16,6 +16,8 @@ func _on_operational_ready() -> void:
 	if is_instance_valid(ResourceManager):
 		ResourceManager.increase_storage(storage_capacity_bonus)
 		print("Хранилище построено! Вместимость склада увеличена на +%d ед." % storage_capacity_bonus)
+		EventBus.show_notification.emit("Storage built! Warehouse capacity increased by +%d units."  % storage_capacity_bonus, 
+		Color(0.547, 0.492, 0.223, 1.0))
 
 
 func _exit_tree() -> void:

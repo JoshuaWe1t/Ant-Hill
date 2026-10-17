@@ -31,7 +31,9 @@ func _on_operational_ready() -> void:
 	production_timer.timeout.connect(_on_production_tick)
 	add_child(production_timer)
 	production_timer.start()
-	print("Ферма тли готова и начала производство ресурсов каждые 15 сек.")
+	print("Ферма тли готова и начала производство ресурсов каждые %f сек." % [production_interval])
+	EventBus.show_notification.emit("The aphid farm is ready and has started producing resources every %f seconds" % [production_interval], 
+		Color(0.547, 0.492, 0.223, 1.0))
 
 
 func _on_production_tick() -> void:
