@@ -41,11 +41,6 @@ func _populate_buttons() -> void:
 		# Если есть текстуры зданий, подгружаем их:
 		btn.texture_normal = data.get("texture")
 		
-		# Заглушка, если нет текстур (зеленый квадрат):
-		#var placeholder = PlaceholderTexture2D.new()
-		#placeholder.size = Vector2(100, 100)
-		#btn.texture_normal = placeholder
-		
 		# Подключение событий наведения и клика
 		btn.mouse_entered.connect(_on_btn_hovered.bind(data, btn))
 		btn.mouse_exited.connect(_on_btn_exited)
@@ -64,7 +59,6 @@ func _set_menu_state(open: bool) -> void:
 		
 	tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	var target_y = visible_y if is_menu_open else hidden_y
-	# Анимация "снизу-вверх", длительность 0.4 сек (не слишком быстро)
 	tween.tween_property(build_panel, "position:y", target_y, 0.4)
 	
 	if not is_menu_open:
